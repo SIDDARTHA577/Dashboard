@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LYY Quality Inspection Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0b0e1a;--surface:#131728;--s2:#1c2138;--border:#252a45;--border2:#2e3557;--accent:#5b73f9;--accent2:#8b6afc;--green:#10b981;--yellow:#f59e0b;--red:#f43f5e;--orange:#f97316;--teal:#06b6d4;--pink:#ec4899;--text:#e2e8f0;--muted:#94a3b8;--r:10px;--r-sm:7px;--shadow-sm:0 1px 6px rgba(0,0,0,.35);--shadow:0 2px 16px rgba(0,0,0,.45)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter','Segoe UI',system-ui,sans-serif;font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:100;background:#0d1022;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;min-height:54px;box-shadow:0 2px 20px rgba(0,0,0,.6)}
+.logo{font-size:16px;font-weight:800;letter-spacing:-.5px;padding:0 20px 0 0;border-right:1px solid var(--border);white-space:nowrap;flex-shrink:0}
+.logo span{color:var(--accent)}
+.tabs{display:flex;overflow-x:auto;flex:1}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:17px 16px;font-size:11.5px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;letter-spacing:.1px;flex-shrink:0}
+.tab:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(91,115,249,.06)}
+
+/* SECTIONS */
+.sec{display:none}
+.sec.active{display:block}
+.sec-inner{max-width:1680px;margin:0 auto;padding:24px 28px 64px}
+
+/* HEADER */
+.hdr{padding:18px 22px;background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:var(--r);margin-bottom:20px;box-shadow:var(--shadow-sm)}
+.hdr h2{font-size:17px;font-weight:700;letter-spacing:-.3px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.hdr p{color:var(--muted);font-size:11.5px;line-height:1.6}
+.file-tag{display:inline-flex;align-items:center;background:rgba(91,115,249,.12);border:1px solid rgba(91,115,249,.25);border-radius:5px;padding:2px 9px;font-size:10.5px;color:var(--accent);font-family:'SF Mono',Consolas,monospace;font-weight:500;vertical-align:middle;letter-spacing:.2px}
+
+/* SECTION LABEL */
+.slabel{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:24px 0 12px;display:flex;align-items:center;gap:10px}
+.slabel::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* FILTERS */
+.filters{display:flex;gap:10px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 18px;margin-bottom:20px;align-items:flex-end;box-shadow:var(--shadow-sm)}
+.fg{display:flex;flex-direction:column;gap:5px;min-width:0}
+.fg label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.7px}
+.fg select,.fg input{background:var(--s2);border:1px solid var(--border);color:var(--text);border-radius:var(--r-sm);padding:7px 28px 7px 10px;font-size:12px;outline:none;cursor:pointer;min-width:130px;transition:border-color .15s,box-shadow .15s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.fg input{background-image:none;padding-right:10px}
+.fg select:focus,.fg input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(91,115,249,.15)}
+
+/* KPI */
+.krow{display:grid;gap:14px;margin-bottom:20px}
+.k4{grid-template-columns:repeat(4,1fr)}.k5{grid-template-columns:repeat(5,1fr)}.k3{grid-template-columns:repeat(3,1fr)}
+.kcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px 16px;position:relative;overflow:hidden;box-shadow:var(--shadow-sm);transition:box-shadow .2s,border-color .2s}
+.kcard:hover{box-shadow:var(--shadow);border-color:var(--border2)}
+.kcard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0}
+.kcard.g::before{background:linear-gradient(90deg,var(--green),rgba(16,185,129,.3))}
+.kcard.r::before{background:linear-gradient(90deg,var(--red),rgba(244,63,94,.3))}
+.kcard.y::before{background:linear-gradient(90deg,var(--yellow),rgba(245,158,11,.3))}
+.kcard.b::before{background:linear-gradient(90deg,var(--accent),rgba(91,115,249,.3))}
+.kcard.p::before{background:linear-gradient(90deg,var(--accent2),rgba(139,106,252,.3))}
+.kcard.o::before{background:linear-gradient(90deg,var(--orange),rgba(249,115,22,.3))}
+.kcard.t::before{background:linear-gradient(90deg,var(--teal),rgba(6,182,212,.3))}
+.kl{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.kv{font-size:30px;font-weight:800;line-height:1;letter-spacing:-1px}
+.kv.g{color:var(--green)}.kv.r{color:var(--red)}.kv.y{color:var(--yellow)}.kv.b{color:var(--accent)}.kv.p{color:var(--accent2)}.kv.o{color:var(--orange)}.kv.t{color:var(--teal)}
+.ks{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.4}
+.kt{font-size:11px;font-weight:600;margin-top:5px}.kt.up{color:var(--green)}.kt.dn{color:var(--red)}
+.pbar{height:4px;background:var(--s2);border-radius:4px;overflow:hidden;margin-top:10px}
+.pfill{height:100%;border-radius:4px}
+.pfill.g{background:linear-gradient(90deg,var(--green),rgba(16,185,129,.5))}
+.pfill.b{background:linear-gradient(90deg,var(--accent),rgba(91,115,249,.5))}
+.pfill.y{background:linear-gradient(90deg,var(--yellow),rgba(245,158,11,.5))}
+.pfill.r{background:linear-gradient(90deg,var(--red),rgba(244,63,94,.5))}
+
+/* CHARTS */
+.cgrid{display:grid;gap:18px;margin-bottom:20px}
+.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:1fr 1fr 1fr}.c32{grid-template-columns:2fr 1fr}.c23{grid-template-columns:1fr 2fr}
+.ccard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-sm);display:flex;flex-direction:column}
+.ccard-head{padding:13px 18px 12px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.015);flex-shrink:0}
+.ccard-head h3{font-size:12px;font-weight:600;color:var(--text);line-height:1.35}
+.ccard-head h3 span{display:block;color:var(--muted);font-weight:400;font-size:11px;margin-top:2px}
+.ccard-body{padding:16px 18px 14px;flex:1}
+.chart-wrap{position:relative;height:240px}
+.c3 .chart-wrap{height:210px}
+
+/* TABLES */
+.tcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:20px;box-shadow:var(--shadow-sm)}
+.tcard-head{padding:13px 20px;border-bottom:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text);background:rgba(255,255,255,.015)}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;white-space:nowrap}
+thead th{background:var(--s2);padding:9px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border)}
+td{padding:9px 14px;font-size:12px;border-bottom:1px solid rgba(37,42,69,.5);color:var(--text)}
+tbody tr:hover td{background:rgba(91,115,249,.05)}
+tbody tr:last-child td{border-bottom:none}
+
+/* PILLS */
+.pill{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10.5px;font-weight:700;letter-spacing:.2px}
+.pill.pass{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.25)}
+.pill.fail{background:rgba(244,63,94,.15);color:var(--red);border:1px solid rgba(244,63,94,.25)}
+.pill.warn{background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.25)}
+.pill.info{background:rgba(91,115,249,.15);color:var(--accent);border:1px solid rgba(91,115,249,.25)}
+
+/* INSIGHTS */
+.irow{display:grid;gap:14px;margin-bottom:20px}
+.i2{grid-template-columns:1fr 1fr}
+.icard{background:var(--surface);border:1px solid var(--border);border-left-width:3px;border-left-style:solid;border-left-color:var(--muted);border-radius:var(--r);padding:16px 18px;display:flex;gap:14px;align-items:flex-start;box-shadow:var(--shadow-sm)}
+.icard.g{border-left-color:var(--green)}.icard.r{border-left-color:var(--red)}.icard.y{border-left-color:var(--yellow)}.icard.b{border-left-color:var(--accent)}.icard.p{border-left-color:var(--accent2)}
+.iico{font-size:16px;width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--s2)}
+.ibody h4{font-size:12.5px;font-weight:700;margin-bottom:5px;line-height:1.3}
+.ibody p{font-size:11.5px;color:var(--muted);line-height:1.65}
+
+/* API DETAILS */
+.api-section{margin-top:8px}
+.api-meta{display:flex;gap:16px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.api-baseurl{font-size:11.5px;color:var(--muted)}
+.api-baseurl code{color:var(--teal);font-family:'SF Mono',Consolas,monospace;font-size:11px;font-weight:600}
+.api-tag{font-size:10px;color:var(--muted);background:var(--s2);border:1px solid var(--border);border-radius:4px;padding:2px 9px;font-weight:600;letter-spacing:.3px}
+.api-grid{display:grid;gap:8px}
+.api-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 16px;display:flex;gap:12px;align-items:flex-start;transition:border-color .15s}
+.api-card:hover{border-color:var(--border2)}
+.api-badge{font-size:9px;font-weight:800;letter-spacing:.5px;padding:3px 7px;border-radius:4px;flex-shrink:0;margin-top:1px;font-family:'SF Mono',Consolas,monospace;white-space:nowrap}
+.api-badge.get{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3)}
+.api-badge.post{background:rgba(91,115,249,.15);color:var(--accent);border:1px solid rgba(91,115,249,.3)}
+.api-badge.put{background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.3)}
+.api-badge.del{background:rgba(244,63,94,.15);color:var(--red);border:1px solid rgba(244,63,94,.3)}
+.api-endpoint{font-family:'SF Mono',Consolas,monospace;font-size:12px;color:var(--accent);font-weight:600;margin-bottom:4px}
+.api-desc{font-size:11.5px;color:var(--text);margin-bottom:4px;line-height:1.5}
+.api-params{font-size:11px;color:var(--muted);line-height:1.5}
+.api-params em{color:var(--yellow);font-style:normal;font-weight:700;font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;margin-right:5px}
+/* RESPONSIVE */
+@media(max-width:1200px){.k4,.k5{grid-template-columns:repeat(2,1fr)}.k3{grid-template-columns:repeat(2,1fr)}.c3{grid-template-columns:1fr 1fr}}
+@media(max-width:900px){.c2,.c3,.c32,.c23{grid-template-columns:1fr}.i2{grid-template-columns:1fr}.k3,.k4,.k5{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.k3,.k4,.k5{grid-template-columns:1fr}.sec-inner{padding:14px 14px 48px}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="logo">LYY <span>QC</span></div>
+  <div class="tabs">
+    <div class="tab active" onclick="show('t1',0)">1 · Daily Check</div>
+    <div class="tab" onclick="show('t2',1)">2 · Fabric Inspection</div>
+    <div class="tab" onclick="show('t3',2)">3 · Field Auditor</div>
+    <div class="tab" onclick="show('t4',3)">4 · Final Inspection</div>
+    <div class="tab" onclick="show('t5',4)">5 · Inline Inspection</div>
+    <div class="tab" onclick="show('t6',5)">6 · PP Meeting</div>
+    <div class="tab" onclick="show('t7',6)">7 · Spot Check</div>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════
+     T1 · DAILY CHECK TEMPLATE
+══════════════════════════════════════════════════ -->
+<section id="t1" class="sec active">
+<div class="sec-inner">
+  <div class="hdr">
+    <h2>Daily Check Template <span class="file-tag">LYY_Daily_Template_v1.1.xlsx</span></h2>
+    <p>Sheet: 1. Daily Check 每日检查 — Daily shopfloor progress, machine utilization, WIP stages, inline AQL &amp; bulk conformity</p>
+  </div>
+
+  <div class="filters">
+    <div class="fg"><label>Factory</label><select><option>All Factories</option><option>Factory A – GZ</option><option>Factory B – DG</option><option>Factory C – SZ</option></select></div>
+    <div class="fg"><label>Style</label><select><option>All Styles</option><option>2024-KN-001</option><option>2024-WV-045</option><option>2024-KN-112</option></select></div>
+    <div class="fg"><label>PO #</label><select><option>All POs</option><option>PO-2401</option><option>PO-2402</option><option>PO-2403</option></select></div>
+    <div class="fg"><label>Audit Stage</label><select><option>All Stages</option><option>Cutting</option><option>Sewing</option><option>Finishing</option><option>Packing</option></select></div>
+    <div class="fg"><label>Line(s)</label><select><option>All Lines</option><option>Line 1</option><option>Line 2</option><option>Line 3</option></select></div>
+    <div class="fg"><label>Inspector</label><select><option>All Inspectors</option><option>Inspector A</option><option>Inspector B</option></select></div>
+    <div class="fg"><label>Date From</label><input type="date" value="2024-01-01"></div>
+    <div class="fg"><label>Date To</label><input type="date" value="2024-06-30"></div>
+  </div>
+
+  <div class="slabel">Visit Details &amp; Machine Utilization</div>
+  <div class="krow k5">
+    <div class="kcard b"><div class="kl">Machine Utilization Rate</div><div class="kv b">83.6%</div><div class="ks">Running / Allocated machines</div><div class="pbar"><div class="pfill b" style="width:83.6%"></div></div></div>
+    <div class="kcard g"><div class="kl">Sewer Productivity</div><div class="kv g">18.4</div><div class="ks">Pcs sewn / sewer / day</div><div class="kt up">↑ +2.1 vs prev week</div></div>
+    <div class="kcard y"><div class="kl">Machines Allocated</div><div class="kv y">90</div><div class="ks">Total across active lines</div></div>
+    <div class="kcard t"><div class="kl">Sewer Headcount</div><div class="kv t">78</div><div class="ks">Active sewers on floor</div></div>
+    <div class="kcard o"><div class="kl">Total Daily Visits</div><div class="kv o">312</div><div class="ks">Inspections this period</div></div>
+  </div>
+
+  <div class="slabel">Production Status — Order → Cutting → Sewing → Finishing → Packed</div>
+  <div class="krow k5">
+    <div class="kcard b"><div class="kl">Order Qty</div><div class="kv b">5,000</div><div class="ks">Total order</div></div>
+    <div class="kcard t"><div class="kl">Cutting</div><div class="kv t">4,800</div><div class="ks">96% of order</div><div class="pbar"><div class="pfill b" style="width:96%"></div></div></div>
+    <div class="kcard g"><div class="kl">Sewing</div><div class="kv g">4,200</div><div class="ks">84% of order</div><div class="pbar"><div class="pfill g" style="width:84%"></div></div></div>
+    <div class="kcard y"><div class="kl">Finishing</div><div class="kv y">2,600</div><div class="ks">52% of order</div><div class="pbar"><div class="pfill y" style="width:52%"></div></div></div>
+    <div class="kcard o"><div class="kl">Packed</div><div class="kv o">1,900</div><div class="ks">38% of order</div><div class="pbar"><div class="pfill r" style="width:38%"></div></div></div>
+  </div>
+
+  <div class="slabel">AQL Inspection — Pcs Available · Inspected · Majors · Minors · Defective % · Result</div>
+  <div class="krow k4">
+    <div class="kcard g"><div class="kl">AQL Pass Rate</div><div class="kv g">87.3%</div><div class="ks">Acceptance (Ac) outcomes</div></div>
+    <div class="kcard r"><div class="kl">Defective %</div><div class="kv r">4.8%</div><div class="ks">Avg across inspected pcs</div></div>
+    <div class="kcard y"><div class="kl">Total Majors Found</div><div class="kv y">219</div><div class="ks">This period</div></div>
+    <div class="kcard b"><div class="kl">Pcs Inspected</div><div class="kv b">3,412</div><div class="ks">of 5,000 available</div></div>
+  </div>
+
+  <div class="cgrid c2">
+    <div class="ccard">
+      <div class="ccard-head"><h3>Machine Utilization by Line <span>(No. Machines Running / Allocated)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t1c1"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>WIP Stage Weekly Progression <span>(Cumulative units reaching each stage · 6-week trend)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t1c2"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="cgrid c3">
+    <div class="ccard">
+      <div class="ccard-head"><h3>In-Process Checks — Radar <span>(OK % vs Not OK % per check category)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap" style="height:220px"><canvas id="t1c3"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Defect Checklist <span>(Fabric · Sewing · Garment)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t1c4"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Document Audit Availability <span>(8 documents)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t1c5"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="cgrid c2">
+    <div class="ccard">
+      <div class="ccard-head"><h3>AQL Inspection Result <span>(Acceptance Ac / Re)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t1c6"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Bulk Conformity — Radar <span>(OK % vs Not OK % across 8 checks)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t1c7"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="tcard">
+    <div class="tcard-head">Daily Visit Log — Style &amp; PO Info · Visit Details · AQL Results</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Date</th><th>Factory</th><th>Style</th><th>PO #</th><th>Line</th><th>Sewers</th><th>Mach. Alloc.</th><th>Mach. Run.</th><th>Util %</th><th>Pcs Inspected</th><th>Majors</th><th>Minors</th><th>Defective %</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>2024-06-03</td><td>Factory A</td><td>2024-KN-001</td><td>PO-2401</td><td>Line 1</td><td>28</td><td>32</td><td>29</td><td><span class="pill pass">90.6%</span></td><td>516</td><td>8</td><td>14</td><td>1.9%</td><td><span class="pill pass">Accept</span></td></tr>
+          <tr><td>2024-06-03</td><td>Factory B</td><td>2024-WV-045</td><td>PO-2402</td><td>Line 2</td><td>24</td><td>28</td><td>21</td><td><span class="pill warn">75.0%</span></td><td>384</td><td>19</td><td>32</td><td>6.4%</td><td><span class="pill fail">Reject</span></td></tr>
+          <tr><td>2024-06-04</td><td>Factory A</td><td>2024-KN-001</td><td>PO-2401</td><td>Line 1</td><td>30</td><td>32</td><td>31</td><td><span class="pill pass">96.9%</span></td><td>558</td><td>4</td><td>9</td><td>0.9%</td><td><span class="pill pass">Accept</span></td></tr>
+          <tr><td>2024-06-04</td><td>Factory C</td><td>2024-KN-112</td><td>PO-2403</td><td>Line 3</td><td>26</td><td>30</td><td>22</td><td><span class="pill warn">73.3%</span></td><td>402</td><td>11</td><td>21</td><td>4.1%</td><td><span class="pill warn">Re-inspect</span></td></tr>
+          <tr><td>2024-06-05</td><td>Factory B</td><td>2024-WV-045</td><td>PO-2402</td><td>Line 2</td><td>22</td><td>28</td><td>19</td><td><span class="pill fail">67.9%</span></td><td>342</td><td>24</td><td>41</td><td>9.1%</td><td><span class="pill fail">Reject</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="irow i2">
+    <div class="icard y"><div class="iico">⚙</div><div class="ibody"><h4>Finishing is the WIP Bottleneck</h4><p>Only 52% of Order Qty has reached Finishing vs 84% at Sewing. This gap signals a pressing/post-process capacity constraint. Cross-reference with Field Auditor Template machine counts for vacuum tables and steam boilers.</p></div></div>
+    <div class="icard r"><div class="iico">⚠</div><div class="ibody"><h4>Factory B: Persistent Low Utilization &amp; AQL Failures</h4><p>Factory B shows 67–75% machine utilization and an AQL Reject on both visits. The Defective % at 6–9% far exceeds the acceptable threshold, indicating a systemic sewing workmanship issue requiring a corrective action plan.</p></div></div>
+  </div>
+
+  <div class="api-section">
+    <div class="slabel" style="margin-top:28px">API Details — Daily Check Template</div>
+    <div class="api-meta">
+      <span class="api-baseurl">Base URL: <code>https://api.lyy-qc.com/v1</code></span>
+      <span class="api-tag">REST · JSON · Bearer Token</span>
+    </div>
+    <div class="api-grid">
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/daily-check/visits</div><div class="api-desc">Retrieve paginated daily visit records with multi-filter support across factories, styles, POs, lines, and inspection stages.</div><div class="api-params"><em>Params</em> factory_id, style, po_number, line_id, stage, inspector_id, date_from, date_to, page, limit</div></div></div>
+      <div class="api-card"><div class="api-badge post">POST</div><div><div class="api-endpoint">/daily-check/visits</div><div class="api-desc">Submit a new daily check visit record including style/PO info, machine utilization, sewer headcount, and WIP stage counts.</div><div class="api-params"><em>Body</em> factory_id, style, po_number, line_id, machines_allocated, machines_running, sewer_count, order_qty, cutting_qty, sewing_qty, finishing_qty, packed_qty</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/daily-check/machine-utilization</div><div class="api-desc">Aggregated machine utilization metrics (running / allocated) grouped by production line for a given factory and date range.</div><div class="api-params"><em>Params</em> factory_id, date_from, date_to, group_by (line|week)</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/daily-check/wip-status</div><div class="api-desc">Current WIP pipeline showing cumulative unit counts at each stage (Order → Cutting → Sewing → Finishing → Packed) with weekly trend data.</div><div class="api-params"><em>Params</em> factory_id, style, po_number, date_from, date_to</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/daily-check/aql-results</div><div class="api-desc">AQL inspection outcomes (Accept/Reject) with pcs inspected, majors, minors, and defective % per visit. Supports aggregation by factory or style.</div><div class="api-params"><em>Params</em> factory_id, style, po_number, stage, date_from, date_to</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/daily-check/in-process-checks</div><div class="api-desc">In-process check compliance results (OK / Not OK / N-A) across all 9 check categories for a given period.</div><div class="api-params"><em>Params</em> factory_id, date_from, date_to, check_category</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/daily-check/bulk-conformity</div><div class="api-desc">Bulk conformity check results across 8 check points (Fit on Dummy, Bulk vs TP, Fabric/Colour, etc.) with OK/Not OK/N-A counts.</div><div class="api-params"><em>Params</em> factory_id, po_number, date_from, date_to</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/daily-check/document-audit</div><div class="api-desc">Document audit availability log across 8 required documents (Tech Pack, PO, PPS/Sealed, Fabric, Accessory, Trim Card, Packing, Size Spec).</div><div class="api-params"><em>Params</em> factory_id, date_from, date_to, document_type</div></div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════════
+     T2 · FABRIC INSPECTION TEMPLATE
+══════════════════════════════════════════════════ -->
+<section id="t2" class="sec">
+<div class="sec-inner">
+  <div class="hdr">
+    <h2>Fabric Inspection Template <span class="file-tag">LYY_Fabric_Template_v1.1.xlsx</span></h2>
+    <p>Sheet: 1. Fabric Inspection 面料检验 — Roll-by-roll defect logging, shade verification, GSM/width checks &amp; lab test results</p>
+  </div>
+
+  <div class="filters">
+    <div class="fg"><label>Vendor / Mill</label><select><option>All Mills</option><option>Mill A – Jiangsu</option><option>Mill B – Zhejiang</option><option>Mill C – Guangdong</option><option>Mill D – Fujian</option></select></div>
+    <div class="fg"><label>Fabric Type / Composition</label><select><option>All Types</option><option>Knit – Jersey</option><option>Knit – Rib</option><option>Woven – Twill</option><option>Woven – Poplin</option></select></div>
+    <div class="fg"><label>Lot # 缸号</label><select><option>All Lots</option><option>L-240401</option><option>L-240402</option><option>L-240415</option></select></div>
+    <div class="fg"><label>Style #</label><select><option>All Styles</option><option>2024-KN-001</option><option>2024-WV-045</option></select></div>
+    <div class="fg"><label>Overall Result</label><select><option>All Results</option><option>Pass</option><option>Fail</option></select></div>
+    <div class="fg"><label>Inspection Date From</label><input type="date" value="2024-01-01"></div>
+    <div class="fg"><label>Date To</label><input type="date" value="2024-06-30"></div>
+  </div>
+
+  <div class="slabel">Order &amp; Fabric Info · Inspection Details · Acceptance Threshold</div>
+  <div class="krow k4">
+    <div class="kcard g"><div class="kl">Avg Pts / 100yd²</div><div class="kv g">19.4</div><div class="ks">Threshold: 28 pts/100yd²</div><div class="pbar"><div class="pfill g" style="width:69%"></div></div></div>
+    <div class="kcard r"><div class="kl">Roll Rejection Rate</div><div class="kv r">8.3%</div><div class="ks">47 of 564 rolls flagged</div><div class="kt dn">↑ +2.1% vs last batch</div></div>
+    <div class="kcard b"><div class="kl">Total Rolls Inspected</div><div class="kv b">564</div><div class="ks">Across 12 lots · 6 mills</div></div>
+    <div class="kcard y"><div class="kl">Highest Risk Mill</div><div class="kv y" style="font-size:18px">Mill B</div><div class="ks">Avg 31.2 pts/100yd² — over threshold</div></div>
+  </div>
+
+  <div class="slabel">Roll-by-Roll Inspection — Length (yd) · Width (in) · Total Pts · Pts/100yd² · Result</div>
+  <div class="cgrid c2">
+    <div class="ccard">
+      <div class="ccard-head"><h3>Mill Defect Performance — Avg Pts/100yd² <span>(threshold = 28)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t2c1"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Roll Results by Lot <span>(Pass / Reject)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t2c2"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="slabel">Defect Log — Code · Defect Name · Band · Pts · Location / Remark</div>
+  <div class="cgrid c3">
+    <div class="ccard">
+      <div class="ccard-head"><h3>Fabric Defect Pareto Analysis <span>(Count · bars — Cumulative % · line)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t2c3"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Shade / Physical Check Pass Rate — Radar <span>(% passing per check type)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap" style="height:220px"><canvas id="t2c4"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Lab / Physical Test Reports <span>(Pass / Fail)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t2c5"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="tcard">
+    <div class="tcard-head">Lot-Level Fabric Inspection Summary — Factory · Vendor/Mill · Lot # · GSM · Width · Total Pts · Overall Result</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Lot #</th><th>Factory</th><th>Vendor / Mill</th><th>Fabric Type</th><th>GSM</th><th>Width (in)</th><th>Rolls</th><th>Total Qty (yd)</th><th>Avg Pts/100yd²</th><th>Rolls Rejected</th><th>Reject %</th><th>Shade Check</th><th>GSM Check</th><th>Overall Result</th><th>Disposition</th></tr></thead>
+        <tbody>
+          <tr><td>L-240401</td><td>Factory A</td><td>Mill A</td><td>Knit – Jersey</td><td>180</td><td>60"</td><td>48</td><td>4,320</td><td>16.2</td><td>2</td><td>4.2%</td><td><span class="pill pass">Pass</span></td><td><span class="pill pass">Pass</span></td><td><span class="pill pass">PASS</span></td><td>Release</td></tr>
+          <tr><td>L-240402</td><td>Factory B</td><td>Mill B</td><td>Woven – Twill</td><td>210</td><td>58"</td><td>62</td><td>5,580</td><td>31.2</td><td>9</td><td>14.5%</td><td><span class="pill fail">Fail</span></td><td><span class="pill pass">Pass</span></td><td><span class="pill fail">FAIL</span></td><td>Return to Mill</td></tr>
+          <tr><td>L-240415</td><td>Factory C</td><td>Mill C</td><td>Knit – Rib</td><td>195</td><td>62"</td><td>35</td><td>3,150</td><td>22.8</td><td>3</td><td>8.6%</td><td><span class="pill pass">Pass</span></td><td><span class="pill warn">Fail</span></td><td><span class="pill warn">COND</span></td><td>Hold for Re-test</td></tr>
+          <tr><td>L-240501</td><td>Factory A</td><td>Mill A</td><td>Woven – Poplin</td><td>120</td><td>57"</td><td>55</td><td>4,950</td><td>18.1</td><td>4</td><td>7.3%</td><td><span class="pill pass">Pass</span></td><td><span class="pill pass">Pass</span></td><td><span class="pill pass">PASS</span></td><td>Release</td></tr>
+          <tr><td>L-240503</td><td>Factory C</td><td>Mill D</td><td>Knit – Jersey</td><td>175</td><td>60"</td><td>41</td><td>3,690</td><td>24.6</td><td>5</td><td>12.2%</td><td><span class="pill warn">Fail</span></td><td><span class="pill pass">Pass</span></td><td><span class="pill warn">COND</span></td><td>Conditional Release</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="irow i2">
+    <div class="icard r"><div class="iico">🚫</div><div class="ibody"><h4>Mill B Exceeds Penalty Point Threshold</h4><p>Mill B averages 31.2 pts/100yd² against a maximum shipment average threshold of 28 pts/100yd². Lot L-240402 also failed centre-to-selvedge shade variation. Formal CAP or source suspension recommended.</p></div></div>
+    <div class="icard y"><div class="iico">🎨</div><div class="ibody"><h4>Shade Failures Concentrated in Woven Lots</h4><p>3 of 4 shade/side-to-side failures this period were woven fabric lots. GSM check failures correlate with Knit lots only. These are distinct root causes requiring separate corrective actions at mill level.</p></div></div>
+  </div>
+
+  <div class="api-section">
+    <div class="slabel" style="margin-top:28px">API Details — Fabric Inspection Template</div>
+    <div class="api-meta">
+      <span class="api-baseurl">Base URL: <code>https://api.lyy-qc.com/v1</code></span>
+      <span class="api-tag">REST · JSON · Bearer Token</span>
+    </div>
+    <div class="api-grid">
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/fabric/inspections</div><div class="api-desc">List fabric inspection records filterable by mill, lot number, fabric type, overall result, and inspection date range.</div><div class="api-params"><em>Params</em> mill_id, lot_number, fabric_type, result (pass|fail|cond), date_from, date_to, style</div></div></div>
+      <div class="api-card"><div class="api-badge post">POST</div><div><div class="api-endpoint">/fabric/inspections</div><div class="api-desc">Submit a new fabric inspection record including lot info, roll-level data, shade checks, GSM/width, and overall result.</div><div class="api-params"><em>Body</em> lot_number, mill_id, factory_id, fabric_type, gsm, width_in, rolls[ ], shade_check, gsm_check, overall_result</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/fabric/rolls/{lot_id}</div><div class="api-desc">Roll-by-roll inspection data for a specific lot including length, width, total penalty points, pts/100yd², and pass/reject result per roll.</div><div class="api-params"><em>Params</em> result_filter (all|pass|reject), sort_by (pts|roll_number)</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/fabric/mills/performance</div><div class="api-desc">Aggregated mill-level defect performance: average pts/100yd², roll rejection rate, and threshold comparison across all inspected mills.</div><div class="api-params"><em>Params</em> mill_id, date_from, date_to, fabric_type</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/fabric/defects/by-code</div><div class="api-desc">Fabric defect frequency analysis by defect code (Stains, Holes, Crease Marks, etc.) with Pareto ranking and cumulative % for a lot or period.</div><div class="api-params"><em>Params</em> lot_id, mill_id, date_from, date_to, sort (count|severity)</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/fabric/shade-checks</div><div class="api-desc">Shade, width, and physical check results per lot (Centre-Selvedge, Side-Side, End-End, Roll-Roll, Width Consistency, GSM vs Spec, Skew/Bow, Hand-feel).</div><div class="api-params"><em>Params</em> lot_id, mill_id, check_type, date_from, date_to</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/fabric/lab-tests</div><div class="api-desc">Lab and physical test report results (Shrinkage Wash/Dry, Crocking CF, Wash CF, GSM/Weight, Spirality, pH) with pass/fail status per test.</div><div class="api-params"><em>Params</em> lot_id, mill_id, test_type, date_from, date_to</div></div></div>
+      <div class="api-card"><div class="api-badge put">PUT</div><div><div class="api-endpoint">/fabric/inspections/{id}/disposition</div><div class="api-desc">Update the lot disposition decision (Release, Return to Mill, Hold for Re-test, Conditional Release) after review by QC lead.</div><div class="api-params"><em>Body</em> disposition (release|return|hold|conditional), remarks, approved_by</div></div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════════
+     T3 · FIELD AUDITOR TEMPLATE
+══════════════════════════════════════════════════ -->
+<section id="t3" class="sec">
+<div class="sec-inner">
+  <div class="hdr">
+    <h2>Field Auditor Template <span class="file-tag">LYY_Field_Auditor_Template_v2.xlsx</span></h2>
+    <p>Sheets: Cover · Pre-Visit · Company · Business · Workforce · Mach-Knit · Mach-CnS · Mach-Finish · Sample Room · Sampling · Fabric Trims · Prod Flow · Compliance · QC Equipment · Non-Neg · Post-Visit</p>
+  </div>
+
+  <div class="filters">
+    <div class="fg"><label>Factory Name</label><select><option>All Factories</option><option>Factory A – GZ</option><option>Factory B – DG</option><option>Factory C – SZ</option><option>Factory D – FS</option></select></div>
+    <div class="fg"><label>Factory Type</label><select><option>All Types</option><option>Cut &amp; Sew</option><option>Knitwear</option><option>Full Package</option></select></div>
+    <div class="fg"><label>Rating (Post-Visit)</label><select><option>All Ratings</option><option>Approved</option><option>Approved with Conditions</option><option>Not Recommended</option></select></div>
+    <div class="fg"><label>ESG Gate Status</label><select><option>All</option><option>All Pass</option><option>Any Fail</option></select></div>
+    <div class="fg"><label>P.O. Vendor</label><select><option>All Vendors</option><option>Vendor A</option><option>Vendor B</option></select></div>
+    <div class="fg"><label>Audit Date From</label><input type="date" value="2024-01-01"></div>
+    <div class="fg"><label>Date To</label><input type="date" value="2024-12-31"></div>
+  </div>
+
+  <div class="slabel">Cover — Factory Size · Total Machines · Workforce · Peak Monthly Capacity · Audit Date</div>
+  <div class="krow k5">
+    <div class="kcard b"><div class="kl">Avg Compliance Score</div><div class="kv b">81.4%</div><div class="ks">14 audited factories</div><div class="pbar"><div class="pfill b" style="width:81.4%"></div></div></div>
+    <div class="kcard r"><div class="kl">ESG Hold Flags</div><div class="kv r">2</div><div class="ks">Orders on hold pending CAP</div></div>
+    <div class="kcard g"><div class="kl">Approved Factories</div><div class="kv g">9 / 14</div><div class="ks">64% full approval</div></div>
+    <div class="kcard y"><div class="kl">Open CAP Items</div><div class="kv y">23</div><div class="ks">Across 6 factories</div></div>
+    <div class="kcard t"><div class="kl">Peak Monthly Capacity</div><div class="kv t">142k</div><div class="ks">pcs / month (combined)</div></div>
+  </div>
+
+  <div class="slabel">Workforce (Sheet 5) · Mach-Knit (6K) · Mach-CnS (6C) · Mach-Finish (6F)</div>
+  <div class="krow k4">
+    <div class="kcard p"><div class="kl">Avg Total Employees</div><div class="kv p">286</div><div class="ks">Per audited factory</div></div>
+    <div class="kcard t"><div class="kl">Avg Sewing Operators</div><div class="kv t">94</div><div class="ks">Per factory</div></div>
+    <div class="kcard b"><div class="kl">Avg Production Lines</div><div class="kv b">4.2</div><div class="ks">Per factory</div></div>
+    <div class="kcard g"><div class="kl">Avg Inline QC Inspectors</div><div class="kv g">6.8</div><div class="ks">Per factory</div></div>
+  </div>
+
+  <div class="cgrid c2">
+    <div class="ccard">
+      <div class="ccard-head"><h3>Factory Compliance Scores <span>(Compliance Sheet 11)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t3c1"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Non-Neg ESG Gate Results <span>(Sheet 13 — Pass / Fail per gate)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t3c2"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="cgrid c3">
+    <div class="ccard">
+      <div class="ccard-head"><h3>Workforce Distribution — Polar Area <span>(Sheet 5 — Avg headcount by role)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t3c3"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Machine Count — Knit &amp; CnS <span>(Sheets 6K / 6C / 6F)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t3c4"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>CAP Status <span>(Post-Visit Sheet 16)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t3c5"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="slabel">Sample Room (Sheet 7) · Sampling Flow (Sheet 8) · Prod Flow (Sheet 10)</div>
+  <div class="krow k4">
+    <div class="kcard g"><div class="kl">PP Sample Approved Before Bulk</div><div class="kv g">11 / 14</div><div class="ks">Factories — 79%</div></div>
+    <div class="kcard b"><div class="kl">Avg Proto → PPS Lead Time</div><div class="kv b">28d</div><div class="ks">Sample lead time typical</div></div>
+    <div class="kcard y"><div class="kl">In-House Prod Flow</div><div class="kv y">71%</div><div class="ks">Avg of 15 production stages</div></div>
+    <div class="kcard p"><div class="kl">Fabric Inspection on Receipt</div><div class="kv p">10 / 14</div><div class="ks">Factories confirm — 71%</div></div>
+  </div>
+
+  <div class="tcard">
+    <div class="tcard-head">Factory Audit Scorecard — Cover · Company · Compliance · Non-Neg · Post-Visit Rating</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Factory Name</th><th>Audit Date</th><th>Factory Type</th><th>Location</th><th>Total Machines</th><th>Workforce</th><th>Peak Cap (pcs/mo)</th><th>Compliance %</th><th>Non-Neg Gates</th><th>Rating</th><th>Open CAPs</th><th>Certifications</th></tr></thead>
+        <tbody>
+          <tr><td>Factory A</td><td>2024-01-15</td><td>Cut &amp; Sew</td><td>Guangzhou</td><td>142</td><td>310</td><td>38,000</td><td><span class="pill pass">93%</span></td><td><span class="pill pass">6/6 Pass</span></td><td><span class="pill pass">APPROVED</span></td><td>0</td><td>ISO 9001, BSCI</td></tr>
+          <tr><td>Factory B</td><td>2024-02-08</td><td>Full Package</td><td>Dongguan</td><td>98</td><td>241</td><td>28,500</td><td><span class="pill warn">71%</span></td><td><span class="pill warn">5/6 Pass</span></td><td><span class="pill warn">COND.</span></td><td>7</td><td>BSCI</td></tr>
+          <tr><td>Factory C</td><td>2024-02-20</td><td>Knitwear</td><td>Shenzhen</td><td>76</td><td>188</td><td>22,000</td><td><span class="pill pass">88%</span></td><td><span class="pill pass">6/6 Pass</span></td><td><span class="pill pass">APPROVED</span></td><td>2</td><td>ISO 9001, SMETA</td></tr>
+          <tr><td>Factory D</td><td>2024-03-05</td><td>Cut &amp; Sew</td><td>Foshan</td><td>112</td><td>294</td><td>31,000</td><td><span class="pill fail">58%</span></td><td><span class="pill fail">4/6 Fail</span></td><td><span class="pill fail">NOT REC.</span></td><td>14</td><td>None</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="irow i2">
+    <div class="icard r"><div class="iico">🚨</div><div class="ibody"><h4>Factory D: ESG Hold — 2 Non-Neg Gates Failed</h4><p>Factory D failed Chemical Mismanagement and Locked Emergency Exit gates (Sheet 13). All orders at Factory D are flagged for hold. Re-audit required before any new PO placement.</p></div></div>
+    <div class="icard g"><div class="iico">📈</div><div class="ibody"><h4>Compliance → Quality Correlation (r = −0.81)</h4><p>Factories scoring ≥85% on Sheet 11 compliance average 2.4% AQL reject rate; those below 70% average 8.3%. Audit score is a reliable leading indicator for shipment quality outcomes.</p></div></div>
+  </div>
+
+  <div class="api-section">
+    <div class="slabel" style="margin-top:28px">API Details — Field Auditor Template</div>
+    <div class="api-meta">
+      <span class="api-baseurl">Base URL: <code>https://api.lyy-qc.com/v1</code></span>
+      <span class="api-tag">REST · JSON · Bearer Token</span>
+    </div>
+    <div class="api-grid">
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/auditor/factory-audits</div><div class="api-desc">List all factory audit records across Cover, Company, Workforce, Machine, Compliance, Non-Neg, and Post-Visit sheets.</div><div class="api-params"><em>Params</em> factory_id, factory_type, rating (approved|cond|not_rec), vendor_id, date_from, date_to</div></div></div>
+      <div class="api-card"><div class="api-badge post">POST</div><div><div class="api-endpoint">/auditor/factory-audits</div><div class="api-desc">Submit a complete factory audit covering all 16 sheets including Cover, Pre-Visit, Workforce, Machines (6K/6C/6F), Compliance, and Post-Visit rating.</div><div class="api-params"><em>Body</em> factory_id, audit_date, auditor_id, sheets[ cover, workforce, machines, compliance, non_neg, post_visit ]</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/auditor/compliance-scores</div><div class="api-desc">Factory compliance scores from Sheet 11 ranked by score, with pass/fail threshold flags and trend vs prior audit.</div><div class="api-params"><em>Params</em> date_from, date_to, min_score, max_score, sort (asc|desc)</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/auditor/non-negotiables/{factory_id}</div><div class="api-desc">ESG Non-Negotiable gate results (Sheet 13) per factory: Child Labour, Locked Exits, Forced Labour, Chemical Mgmt, Hidden Sub-con, Building Safety.</div><div class="api-params"><em>Params</em> audit_id, gate_category</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/auditor/workforce/{factory_id}</div><div class="api-desc">Workforce headcount breakdown by role (Sheet 5): total employees, sewing operators, inline QC, cutting ops, sample sewers, pattern makers, mechanics.</div><div class="api-params"><em>Params</em> audit_id</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/auditor/machines/{factory_id}</div><div class="api-desc">Machine inventory by type from Sheets 6K (Knit), 6C (Cut &amp; Sew), and 6F (Finishing): machine counts, age, and capacity metrics.</div><div class="api-params"><em>Params</em> audit_id, machine_type (knit|cns|finish)</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/auditor/cap-items</div><div class="api-desc">Open Corrective Action Plan items (Post-Visit Sheet 16) across all factories with status, due dates, and responsible party.</div><div class="api-params"><em>Params</em> factory_id, status (open|in_progress|closed|overdue), due_before</div></div></div>
+      <div class="api-card"><div class="api-badge put">PUT</div><div><div class="api-endpoint">/auditor/cap-items/{id}</div><div class="api-desc">Update a CAP item status, add closure evidence, or reassign the responsible party and due date.</div><div class="api-params"><em>Body</em> status, closure_evidence_url, due_date, responsible_party, remarks</div></div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════════
+     T4 · FINAL INSPECTION TEMPLATE
+══════════════════════════════════════════════════ -->
+<section id="t4" class="sec">
+<div class="sec-inner">
+  <div class="hdr">
+    <h2>Final Inspection Template <span class="file-tag">LYY_Final_Inspection_Template_v1.1.xlsx</span></h2>
+    <p>Sheets: 1. Insp Time &amp; PO Style Info · 3. Cutting Report · 5. Packing &amp; Shipping Mark · 6. Accessories · 7. Check Point List · 8. Workmanship Defects · 9. Production Safety Mgmt · 10. Random Sampling–Meas · 11. Random Sampling–AQL · 13. Keep Sample</p>
+  </div>
+
+  <div class="filters">
+    <div class="fg"><label>Factory</label><select><option>All Factories</option><option>Factory A – GZ</option><option>Factory B – DG</option><option>Factory C – SZ</option></select></div>
+    <div class="fg"><label>Style</label><select><option>All Styles</option><option>2024-KN-001</option><option>2024-WV-045</option></select></div>
+    <div class="fg"><label>PO #</label><select><option>All POs</option><option>PO-2401</option><option>PO-2402</option></select></div>
+    <div class="fg"><label>Material</label><select><option>All Materials</option><option>Knitwear</option><option>Woven</option></select></div>
+    <div class="fg"><label>Product Category</label><select><option>All Categories</option><option>Tops</option><option>Bottoms</option><option>Outerwear</option></select></div>
+    <div class="fg"><label>AQL Result</label><select><option>All</option><option>Pass</option><option>Fail</option></select></div>
+    <div class="fg"><label>Inspection Date From</label><input type="date" value="2024-01-01"></div>
+    <div class="fg"><label>Date To</label><input type="date" value="2024-06-30"></div>
+  </div>
+
+  <div class="slabel">Sheet 11. Random Sampling–AQL — Sampling Size · Accept Level · Reject Level · Rejected Pieces · Results</div>
+  <div class="krow k5">
+    <div class="kcard g"><div class="kl">First-Pass Yield (FPY)</div><div class="kv g">94.2%</div><div class="ks">Sampling Size − Rejected Pieces / Sampling Size</div><div class="pbar"><div class="pfill g" style="width:94.2%"></div></div></div>
+    <div class="kcard r"><div class="kl">Total Rejected Pieces</div><div class="kv r">342</div><div class="ks">of 5,876 sampling size</div></div>
+    <div class="kcard b"><div class="kl">AQL Pass Rate</div><div class="kv b">78.6%</div><div class="ks">Inspections with Pass result</div></div>
+    <div class="kcard y"><div class="kl">Avg Defective %</div><div class="kv y">4.8%</div><div class="ks">Across all final lots</div></div>
+    <div class="kcard t"><div class="kl">Color Count</div><div class="kv t">3.2</div><div class="ks">Avg colors per inspection</div></div>
+  </div>
+
+  <div class="slabel">Sheet 8. Workmanship Defects — CRIT · MAJ · MIN · Defect Type · Position · Pre-Alert</div>
+  <div class="cgrid c2">
+    <div class="ccard">
+      <div class="ccard-head"><h3>Workmanship Defects by Type <span>(CRIT / MAJ / MIN)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t4c1"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Defect Position — Bubble <span>(Bubble size = relative count · X axis = position · Y axis = defect frequency)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t4c2"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="slabel">Sheet 7. Check Point List — Sewing · Trimming · Labelling · Measurements · Packing · Fabric · Vacuum Pack</div>
+  <div class="cgrid c3">
+    <div class="ccard">
+      <div class="ccard-head"><h3>Checkpoint Results — Radar <span>(OK % vs Not Conform % per category)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap" style="height:220px"><canvas id="t4c3"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Sheet 9. Safety Mgmt — Needle &amp; Metal Detection <span>(Y / N)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t4c4"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Sheet 6. Accessories Check <span>(Present / Missing)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t4c5"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="slabel">Sheet 10. Random Sampling–Meas — Measurements Qty · Major · Minor</div>
+  <div class="krow k3">
+    <div class="kcard b"><div class="kl">Measurements Qty Checked</div><div class="kv b">1,240</div><div class="ks">This period</div></div>
+    <div class="kcard r"><div class="kl">Measurement Majors</div><div class="kv r">48</div><div class="ks">3.9% of checked</div></div>
+    <div class="kcard y"><div class="kl">Measurement Minors</div><div class="kv y">91</div><div class="ks">7.3% of checked</div></div>
+  </div>
+
+  <div class="tcard">
+    <div class="tcard-head">Final Inspection Report Log — Sheet 1 (PO Info) · Sheet 3 (Cutting Report) · Sheet 11 (AQL) · Sheet 5 (Packing)</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Insp. Date</th><th>Factory</th><th>Style</th><th>PO #</th><th>Material</th><th>Color Count</th><th>Order Qty</th><th>Cutting QTY</th><th>Sampling Size</th><th>Rejected Pcs</th><th>Defective %</th><th>AQL Result</th><th>Weight Status</th><th>Meas. Status</th></tr></thead>
+        <tbody>
+          <tr><td>2024-06-05</td><td>Factory A</td><td>2024-KN-001</td><td>PO-2401</td><td>Knitwear</td><td>3</td><td>2,400</td><td>2,450</td><td>200</td><td>6</td><td>3.0%</td><td><span class="pill pass">Pass</span></td><td><span class="pill pass">OK</span></td><td><span class="pill pass">OK</span></td></tr>
+          <tr><td>2024-06-06</td><td>Factory B</td><td>2024-WV-045</td><td>PO-2402</td><td>Woven</td><td>5</td><td>3,100</td><td>3,180</td><td>315</td><td>28</td><td>8.9%</td><td><span class="pill fail">Fail</span></td><td><span class="pill pass">OK</span></td><td><span class="pill warn">Fail</span></td></tr>
+          <tr><td>2024-06-07</td><td>Factory C</td><td>2024-KN-112</td><td>PO-2403</td><td>Knitwear</td><td>2</td><td>1,800</td><td>1,820</td><td>125</td><td>4</td><td>3.2%</td><td><span class="pill pass">Pass</span></td><td><span class="pill pass">OK</span></td><td><span class="pill pass">OK</span></td></tr>
+          <tr><td>2024-06-08</td><td>Factory A</td><td>2024-KN-201</td><td>PO-2404</td><td>Knitwear</td><td>4</td><td>2,200</td><td>2,240</td><td>200</td><td>3</td><td>1.5%</td><td><span class="pill pass">Pass</span></td><td><span class="pill pass">OK</span></td><td><span class="pill pass">OK</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="irow i2">
+    <div class="icard r"><div class="iico">⚠</div><div class="ibody"><h4>Open Seams &amp; Broken Stitches Drive 45% of Major Defects</h4><p>Sheet 8 Workmanship data shows Open Seams (127 MAJ) and Skip/Broken Stitches (85 MAJ) together account for 45% of all Major defect count this period. Both defect types originate at the sewing operation.</p></div></div>
+    <div class="icard b"><div class="iico">🔒</div><div class="ibody"><h4>Sheet 9 Safety: Metal-Free Zone Most Violated</h4><p>6 Metal-Free Zone violations recorded on Sheet 9 (Production Safety Mgmt) — all on packing-side workstations. Broken needle records are missing in 22% of inspections, making it the most frequently absent safety log entry.</p></div></div>
+  </div>
+
+  <div class="api-section">
+    <div class="slabel" style="margin-top:28px">API Details — Final Inspection Template</div>
+    <div class="api-meta">
+      <span class="api-baseurl">Base URL: <code>https://api.lyy-qc.com/v1</code></span>
+      <span class="api-tag">REST · JSON · Bearer Token</span>
+    </div>
+    <div class="api-grid">
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/final-inspection/records</div><div class="api-desc">List final inspection records filterable by factory, style, PO, material, product category, AQL result, and date range.</div><div class="api-params"><em>Params</em> factory_id, style, po_number, material, category, aql_result (pass|fail), date_from, date_to</div></div></div>
+      <div class="api-card"><div class="api-badge post">POST</div><div><div class="api-endpoint">/final-inspection/records</div><div class="api-desc">Submit a new final inspection record capturing PO info (Sheet 1), cutting report (Sheet 3), packing/shipping mark (Sheet 5), and inspection metadata.</div><div class="api-params"><em>Body</em> factory_id, style, po_number, material, color_count, order_qty, cutting_qty, insp_date, inspector_id</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/final-inspection/aql/{inspection_id}</div><div class="api-desc">AQL random sampling results from Sheet 11: sampling size, accept level (Ac), reject level (Re), rejected pieces, defective %, and final result.</div><div class="api-params"><em>Params</em> inspection_id</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/final-inspection/workmanship/{inspection_id}</div><div class="api-desc">Workmanship defects from Sheet 8: CRIT/MAJ/MIN counts, defect type, body position, and pre-alert flag per defect entry.</div><div class="api-params"><em>Params</em> inspection_id, severity (crit|maj|min), position</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/final-inspection/checkpoints/{inspection_id}</div><div class="api-desc">Check Point List results from Sheet 7: OK / Not Conform status across Sewing, Trimming, Labelling, Measurements, Packing, Fabric, and Vacuum Pack.</div><div class="api-params"><em>Params</em> inspection_id, category</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/final-inspection/safety/{inspection_id}</div><div class="api-desc">Production Safety Management data from Sheet 9: needle log, broken needle records, transfer box, 100% metal detection, MD calibration, metal-free zone, sharp bindings.</div><div class="api-params"><em>Params</em> inspection_id</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/final-inspection/measurements/{inspection_id}</div><div class="api-desc">Random sampling measurement results from Sheet 10: measurements quantity checked, major deviations, and minor deviations vs spec.</div><div class="api-params"><em>Params</em> inspection_id</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/final-inspection/accessories/{inspection_id}</div><div class="api-desc">Accessories check from Sheet 6: present/missing status for Zipper, Lining, Polybag, Hang Tag, Price Ticket, Buttons, Care Label, Main Label, Factory ID.</div><div class="api-params"><em>Params</em> inspection_id</div></div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════════
+     T5 · INLINE INSPECTION TEMPLATE
+══════════════════════════════════════════════════ -->
+<section id="t5" class="sec">
+<div class="sec-inner">
+  <div class="hdr">
+    <h2>Inline Inspection Template <span class="file-tag">LYY_Inline_Inspection_Template_v1.1.xlsx</span></h2>
+    <p>Sheets: 1. Insp Time &amp; PO Style Info · 5. Accessories · 6. Production Status · 8. Pre-packaged Photos · 9. Check Point List · 10. Workmanship Defects · 11. Production Safety Mgmt · 12. Random Sampling–Meas · 14. Keep Sample</p>
+  </div>
+
+  <div class="filters">
+    <div class="fg"><label>Factory</label><select><option>All Factories</option><option>Factory A – GZ</option><option>Factory B – DG</option><option>Factory C – SZ</option></select></div>
+    <div class="fg"><label>Style</label><select><option>All Styles</option><option>2024-KN-001</option><option>2024-WV-045</option></select></div>
+    <div class="fg"><label>PO #</label><select><option>All POs</option><option>PO-2401</option><option>PO-2402</option></select></div>
+    <div class="fg"><label>Material</label><select><option>All Materials</option><option>Knitwear</option><option>Woven</option></select></div>
+    <div class="fg"><label>Product Category</label><select><option>All Categories</option><option>Tops</option><option>Bottoms</option></select></div>
+    <div class="fg"><label>Inspection Date From</label><input type="date" value="2024-01-01"></div>
+    <div class="fg"><label>Date To</label><input type="date" value="2024-06-30"></div>
+  </div>
+
+  <div class="slabel">Sheet 6. Production Status — Order · Cutting · Sampling Size · In-House / Subcontracted</div>
+  <div class="krow k5">
+    <div class="kcard b"><div class="kl">Order Qty</div><div class="kv b">5,000</div><div class="ks">Inline period total</div></div>
+    <div class="kcard t"><div class="kl">Cutting Pieces</div><div class="kv t">4,800</div><div class="ks">96% of order qty</div><div class="pbar"><div class="pfill b" style="width:96%"></div></div></div>
+    <div class="kcard g"><div class="kl">Semi Finished</div><div class="kv g">3,600</div><div class="ks">72% of order qty</div><div class="pbar"><div class="pfill g" style="width:72%"></div></div></div>
+    <div class="kcard y"><div class="kl">Finished</div><div class="kv y">2,400</div><div class="ks">48% of order qty</div><div class="pbar"><div class="pfill y" style="width:48%"></div></div></div>
+    <div class="kcard o"><div class="kl">In-House Share</div><div class="kv o">74%</div><div class="ks">vs 26% subcontracted</div></div>
+  </div>
+
+  <div class="slabel">Sheet 10. Workmanship Defects — CRIT · MAJ · MIN · Defect Type · Position · Pre Alert</div>
+  <div class="krow k4">
+    <div class="kcard r"><div class="kl">Critical Defects</div><div class="kv r">4</div><div class="ks">Sheet 10 — CRIT count</div></div>
+    <div class="kcard y"><div class="kl">Major Defects</div><div class="kv y">212</div><div class="ks">Sheet 10 — MAJ count</div></div>
+    <div class="kcard b"><div class="kl">Minor Defects</div><div class="kv b">148</div><div class="ks">Sheet 10 — MIN count</div></div>
+    <div class="kcard g"><div class="kl">Pre-packaged Photo Pass</div><div class="kv g">89%</div><div class="ks">Sheet 8 — Pass / Fail</div></div>
+  </div>
+
+  <div class="cgrid c2">
+    <div class="ccard">
+      <div class="ccard-head"><h3>Production Stage Weekly Trend — Line <span>(Sheet 6 — Cutting → Semi-Finished → Finished progression)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t5c1"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Final Process Status <span>(Sheet 6 — Trimming · Final Pressing · Packing)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t5c2"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="cgrid c3">
+    <div class="ccard">
+      <div class="ccard-head"><h3>Sheet 10. Workmanship Defect Types <span>(CRIT / MAJ / MIN)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t5c3"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Sheet 9. Check Point List — Radar <span>(OK % vs Not Conform % per category)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap" style="height:220px"><canvas id="t5c4"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Sheet 11. Safety Mgmt <span>(Needle / Sharp / Metal Det.)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t5c5"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="slabel">Sheet 12. Random Sampling–Meas — Measurements Qty · Major · Minor</div>
+  <div class="krow k3">
+    <div class="kcard b"><div class="kl">Measurements Checked</div><div class="kv b">892</div><div class="ks">This period (inline)</div></div>
+    <div class="kcard r"><div class="kl">Measurement Majors</div><div class="kv r">31</div><div class="ks">3.5% — out of spec</div></div>
+    <div class="kcard y"><div class="kl">Measurement Minors</div><div class="kv y">58</div><div class="ks">6.5% — marginal</div></div>
+  </div>
+
+  <div class="tcard">
+    <div class="tcard-head">Inline Inspection Log — Sheet 1 (PO Info) · Sheet 6 (Production Status) · Sheet 10 (Defects) · Sheet 12 (Meas.)</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Insp. Date</th><th>Factory</th><th>Style</th><th>PO #</th><th>Color Count</th><th>Order Qty</th><th>Cutting Qty</th><th>Semi Finished</th><th>Finished</th><th>CRIT</th><th>MAJ</th><th>MIN</th><th>Photo Pass</th><th>Meas. Majors</th></tr></thead>
+        <tbody>
+          <tr><td>2024-06-01</td><td>Factory A</td><td>2024-KN-001</td><td>PO-2401</td><td>3</td><td>2,400</td><td>2,350</td><td>1,900</td><td>1,200</td><td>0</td><td>14</td><td>22</td><td><span class="pill pass">Pass</span></td><td>3</td></tr>
+          <tr><td>2024-06-01</td><td>Factory B</td><td>2024-WV-045</td><td>PO-2402</td><td>5</td><td>3,100</td><td>3,000</td><td>2,100</td><td>900</td><td>2</td><td>58</td><td>41</td><td><span class="pill fail">Fail</span></td><td>12</td></tr>
+          <tr><td>2024-06-02</td><td>Factory C</td><td>2024-KN-112</td><td>PO-2403</td><td>2</td><td>1,800</td><td>1,750</td><td>1,400</td><td>820</td><td>0</td><td>21</td><td>18</td><td><span class="pill pass">Pass</span></td><td>5</td></tr>
+          <tr><td>2024-06-03</td><td>Factory A</td><td>2024-KN-201</td><td>PO-2404</td><td>4</td><td>2,200</td><td>2,200</td><td>1,800</td><td>1,400</td><td>0</td><td>8</td><td>14</td><td><span class="pill pass">Pass</span></td><td>2</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="irow i2">
+    <div class="icard y"><div class="iico">🔄</div><div class="ibody"><h4>Defect Escape from Inline to Final</h4><p>Inline Template Sheet 10 records 212 Major defects this period; the Final Inspection Template logs 185 Majors in the same lots. The 87% retention rate means inline QC is catching the majority of defects before final shipment.</p></div></div>
+    <div class="icard r"><div class="iico">📦</div><div class="ibody"><h4>Factory B: Pre-packaged Photo Failure (Sheet 8)</h4><p>Factory B's pre-packaged photo (Sheet 8) failed on both inspection dates due to incorrect folding method and missing polybag sticker. These are Accessories items that should be flagged in Sheet 5 as well.</p></div></div>
+  </div>
+
+  <div class="api-section">
+    <div class="slabel" style="margin-top:28px">API Details — Inline Inspection Template</div>
+    <div class="api-meta">
+      <span class="api-baseurl">Base URL: <code>https://api.lyy-qc.com/v1</code></span>
+      <span class="api-tag">REST · JSON · Bearer Token</span>
+    </div>
+    <div class="api-grid">
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/inline-inspection/records</div><div class="api-desc">List inline inspection records filterable by factory, style, PO, material, product category, and inspection date range.</div><div class="api-params"><em>Params</em> factory_id, style, po_number, material, category, date_from, date_to, page, limit</div></div></div>
+      <div class="api-card"><div class="api-badge post">POST</div><div><div class="api-endpoint">/inline-inspection/records</div><div class="api-desc">Submit a new inline inspection record with PO info (Sheet 1) and inspection metadata including colour count, order qty, and in-house/subcontracted split.</div><div class="api-params"><em>Body</em> factory_id, style, po_number, material, color_count, order_qty, in_house_pct, insp_date, inspector_id</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/inline-inspection/production-status/{id}</div><div class="api-desc">Production status data from Sheet 6: order qty, cutting pieces, semi-finished, finished, embroider/print outside and back, in-house vs subcontracted share.</div><div class="api-params"><em>Params</em> inspection_id, week (for weekly trend)</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/inline-inspection/workmanship/{id}</div><div class="api-desc">Workmanship defects from Sheet 10: CRIT/MAJ/MIN counts, defect type, body position, and pre-alert flag per defect entry.</div><div class="api-params"><em>Params</em> inspection_id, severity (crit|maj|min), position</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/inline-inspection/checkpoints/{id}</div><div class="api-desc">Check Point List results from Sheet 9: OK / Not Conform status per category (Sewing, Trimming, Labelling, Measurements, Packing, Fabric, Vacuum Pack).</div><div class="api-params"><em>Params</em> inspection_id, category</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/inline-inspection/safety/{id}</div><div class="api-desc">Safety management records from Sheet 11: needle log, broken needle, needle box, 100% metal detection, MD calibration, metal-free zone, sharp bindings.</div><div class="api-params"><em>Params</em> inspection_id</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/inline-inspection/measurements/{id}</div><div class="api-desc">Random sampling measurement results from Sheet 12: total measurements checked, major deviations count, and minor deviations count.</div><div class="api-params"><em>Params</em> inspection_id</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/inline-inspection/photos/{id}</div><div class="api-desc">Pre-packaged photo results from Sheet 8: pass/fail status with remarks on folding method, polybag sticker, and packaging conformance.</div><div class="api-params"><em>Params</em> inspection_id</div></div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════════
+     T6 · PP MEETING TEMPLATE
+══════════════════════════════════════════════════ -->
+<section id="t6" class="sec">
+<div class="sec-inner">
+  <div class="hdr">
+    <h2>PP Meeting Template <span class="file-tag">LYY_PP_Template_v2.1.xlsx</span></h2>
+    <p>Sheet: 1. PP Meeting 产前会议 — Style &amp; PO Info · Colours &amp; Quantity Table · Meeting Details &amp; Milestones · Schedule Dates (Plan vs Actual Cut / Sew / Finishing / Packing)</p>
+  </div>
+
+  <div class="filters">
+    <div class="fg"><label>Vendor</label><select><option>All Vendors</option><option>Vendor A</option><option>Vendor B</option></select></div>
+    <div class="fg"><label>Factory &amp; Code</label><select><option>All Factories</option><option>Factory A – GZ</option><option>Factory B – DG</option><option>Factory C – SZ</option></select></div>
+    <div class="fg"><label>Style</label><select><option>All Styles</option><option>2024-KN-001</option><option>2024-WV-045</option></select></div>
+    <div class="fg"><label>Brand / Dept</label><select><option>All Brands</option><option>Brand A</option><option>Brand B</option></select></div>
+    <div class="fg"><label>Season</label><select><option>All Seasons</option><option>SS 2024</option><option>AW 2024</option><option>SS 2025</option></select></div>
+    <div class="fg"><label>PP Approved</label><select><option>All</option><option>Yes</option><option>No</option><option>Pending</option></select></div>
+    <div class="fg"><label>Key / High-Risk Style</label><select><option>All</option><option>High-Risk Only</option><option>Standard</option></select></div>
+    <div class="fg"><label>X-Factory Date From</label><input type="date" value="2024-01-01"></div>
+  </div>
+
+  <div class="slabel">Meeting Details &amp; Milestones — PPM Date · PP Approved · Green Tag Sample · Size Set Status</div>
+  <div class="krow k5">
+    <div class="kcard g"><div class="kl">PP Sample Approved</div><div class="kv g">79%</div><div class="ks">Yes / Total POs</div><div class="pbar"><div class="pfill g" style="width:79%"></div></div></div>
+    <div class="kcard b"><div class="kl">Green Tag Sample</div><div class="kv b">71%</div><div class="ks">Yes / Total POs</div><div class="pbar"><div class="pfill b" style="width:71%"></div></div></div>
+    <div class="kcard y"><div class="kl">Size Set Confirmed</div><div class="kv y">84%</div><div class="ks">Yes / Total POs</div></div>
+    <div class="kcard r"><div class="kl">High-Risk Styles</div><div class="kv r">6</div><div class="ks">Key / High-Risk Style = Yes</div></div>
+    <div class="kcard t"><div class="kl">Multi-Factory POs</div><div class="kv t">4</div><div class="ks">Multi-Factory Production = Yes</div></div>
+  </div>
+
+  <div class="slabel">Schedule Dates — Plan Cut / Actual Cut · Plan Sew / Actual Sew · Finishing Date · Packing Date</div>
+  <div class="krow k4">
+    <div class="kcard r"><div class="kl">Avg Cut Slippage</div><div class="kv r">+4.2d</div><div class="ks">Actual − Plan Cut Date</div></div>
+    <div class="kcard r"><div class="kl">Avg Sew Slippage</div><div class="kv r">+6.8d</div><div class="ks">Actual − Plan Sew Date</div></div>
+    <div class="kcard g"><div class="kl">On-Track POs</div><div class="kv g">61%</div><div class="ks">23 of 38 active POs</div></div>
+    <div class="kcard o"><div class="kl">At Risk / Critical</div><div class="kv o">39%</div><div class="ks">15 POs behind schedule</div></div>
+  </div>
+
+  <div class="cgrid c2">
+    <div class="ccard">
+      <div class="ccard-head"><h3>Cut &amp; Sew Slippage Trend — Line <span>(Days delayed per PO · Actual − Plan)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t6c1"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>PP / Green Tag / Size Set Approval Status <span>(Yes / No / Pending)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t6c2"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="cgrid c3">
+    <div class="ccard">
+      <div class="ccard-head"><h3>Season Distribution <span>(Colours &amp; Quantity Table)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t6c3"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Production Country Split</h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t6c4"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Order Completion Rate by Factory</h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t6c5"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="tcard">
+    <div class="tcard-head">PO Milestone Tracker — Style &amp; PO Info · Milestones · Schedule Dates (Plan vs Actual)</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>PPM Date</th><th>Vendor</th><th>Factory</th><th>Style</th><th>PO #</th><th>Season</th><th>High-Risk</th><th>PP Approved</th><th>Green Tag</th><th>Plan Cut</th><th>Actual Cut</th><th>Cut Slip</th><th>Plan Sew</th><th>Actual Sew</th><th>Sew Slip</th><th>X-Factory</th></tr></thead>
+        <tbody>
+          <tr><td>2024-01-02</td><td>Vendor A</td><td>Factory A</td><td>2024-KN-001</td><td>PO-2401</td><td>SS 2024</td><td>No</td><td><span class="pill pass">Yes</span></td><td><span class="pill pass">Yes</span></td><td>Jan 5</td><td>Jan 5</td><td><span class="pill pass">0d</span></td><td>Jan 18</td><td>Jan 19</td><td><span class="pill warn">+1d</span></td><td>Feb 10</td></tr>
+          <tr><td>2024-01-10</td><td>Vendor B</td><td>Factory B</td><td>2024-WV-045</td><td>PO-2402</td><td>SS 2024</td><td>Yes</td><td><span class="pill warn">Pending</span></td><td><span class="pill fail">No</span></td><td>Jan 12</td><td>Jan 18</td><td><span class="pill warn">+6d</span></td><td>Jan 28</td><td>Feb 7</td><td><span class="pill fail">+10d</span></td><td>Feb 25</td></tr>
+          <tr><td>2024-01-18</td><td>Vendor A</td><td>Factory C</td><td>2024-KN-112</td><td>PO-2403</td><td>AW 2024</td><td>No</td><td><span class="pill pass">Yes</span></td><td><span class="pill pass">Yes</span></td><td>Jan 20</td><td>Jan 23</td><td><span class="pill warn">+3d</span></td><td>Feb 2</td><td>Feb 5</td><td><span class="pill warn">+3d</span></td><td>Mar 1</td></tr>
+          <tr><td>2024-01-29</td><td>Vendor A</td><td>Factory A</td><td>2024-KN-201</td><td>PO-2404</td><td>AW 2024</td><td>No</td><td><span class="pill pass">Yes</span></td><td><span class="pill pass">Yes</span></td><td>Feb 1</td><td>Feb 1</td><td><span class="pill pass">0d</span></td><td>Feb 14</td><td>Feb 14</td><td><span class="pill pass">0d</span></td><td>Mar 5</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="irow i2">
+    <div class="icard r"><div class="iico">📅</div><div class="ibody"><h4>Sew Slippage Amplifies Cut Slippage</h4><p>Avg Sew slippage (+6.8d) is 1.6× larger than Cut slippage (+4.2d). When PP Meeting Schedule Dates show a cut delay, the sewing delay consistently compounds it. PP planned dates must include factory-specific buffer based on historical slippage data.</p></div></div>
+    <div class="icard y"><div class="iico">⚑</div><div class="ibody"><h4>High-Risk Styles with Missing Green Tag Sample</h4><p>PO-2402 is flagged as Key / High-Risk Style (PP Meeting field) yet Green Tag Sample status is "No". This is a process gap — High-Risk Style flag should trigger mandatory Green Tag before bulk cut approval is granted.</p></div></div>
+  </div>
+
+  <div class="api-section">
+    <div class="slabel" style="margin-top:28px">API Details — PP Meeting Template</div>
+    <div class="api-meta">
+      <span class="api-baseurl">Base URL: <code>https://api.lyy-qc.com/v1</code></span>
+      <span class="api-tag">REST · JSON · Bearer Token</span>
+    </div>
+    <div class="api-grid">
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/pp-meeting/records</div><div class="api-desc">List PP meeting records filterable by vendor, factory, style, brand, season, PP approval status, high-risk flag, and X-factory date.</div><div class="api-params"><em>Params</em> vendor_id, factory_id, style, brand, season, pp_approved, high_risk, date_from, date_to</div></div></div>
+      <div class="api-card"><div class="api-badge post">POST</div><div><div class="api-endpoint">/pp-meeting/records</div><div class="api-desc">Submit a new PP meeting record including Style &amp; PO info, Colours &amp; Quantity table, Meeting Details &amp; Milestones, and planned Schedule Dates.</div><div class="api-params"><em>Body</em> vendor_id, factory_id, style, po_number, brand, season, ppm_date, milestones, schedule_dates, colours_qty[ ]</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/pp-meeting/schedule/{po_id}</div><div class="api-desc">Plan vs Actual schedule dates for a PO: cut date pair, sew date pair, finishing date, packing date, X-factory date, with computed slippage days.</div><div class="api-params"><em>Params</em> po_id</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/pp-meeting/milestones/{po_id}</div><div class="api-desc">PP Meeting milestone status: PPM date, PP Sample Approved (Y/N/Pending), Green Tag Sample (Y/N), Size Set Status, Multi-Factory Production flag.</div><div class="api-params"><em>Params</em> po_id</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/pp-meeting/slippage/summary</div><div class="api-desc">Aggregated slippage KPI summary: avg cut slippage days, avg sew slippage days, on-track PO count, at-risk count, critical count across filters.</div><div class="api-params"><em>Params</em> vendor_id, factory_id, season, date_from, date_to</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/pp-meeting/colours-quantities/{po_id}</div><div class="api-desc">Colour and quantity breakdown from the Colours &amp; Quantity Table: colour name, quantity per colour, size ratio breakdown, and total order qty.</div><div class="api-params"><em>Params</em> po_id</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/pp-meeting/completion-rates</div><div class="api-desc">Factory-level order completion rates broken down as On Track, At Risk, and Critical across all active POs for a given season or date window.</div><div class="api-params"><em>Params</em> factory_id, season, date_from, date_to</div></div></div>
+      <div class="api-card"><div class="api-badge put">PUT</div><div><div class="api-endpoint">/pp-meeting/records/{id}/milestones</div><div class="api-desc">Update milestone status for a PP meeting record: PP Approved, Green Tag Sample result, Size Set confirmation, and Multi-Factory Production flag.</div><div class="api-params"><em>Body</em> pp_approved, green_tag_sample, size_set_status, multi_factory, updated_by</div></div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════════
+     T7 · SPOT CHECK TEMPLATE
+══════════════════════════════════════════════════ -->
+<section id="t7" class="sec">
+<div class="sec-inner">
+  <div class="hdr">
+    <h2>Spot Check Template <span class="file-tag">LYY_Spot_Template_v1.1.xlsx</span></h2>
+    <p>Sheet: 1. Spot Check 抽查 — Style &amp; PO Info · Spot Check Details · Document Audit · In-Process Checks · AQL Spot Inspection (Sec 5 &amp; 8) · Findings/Defects List · Bulk Conformity · CAPA &amp; Conclusion</p>
+  </div>
+
+  <div class="filters">
+    <div class="fg"><label>Factory</label><select><option>All Factories</option><option>Factory A – GZ</option><option>Factory B – DG</option><option>Factory C – SZ</option></select></div>
+    <div class="fg"><label>Style</label><select><option>All Styles</option><option>2024-KN-001</option><option>2024-WV-045</option></select></div>
+    <div class="fg"><label>Factory Type</label><select><option>All Types</option><option>Cut &amp; Sew</option><option>Knitwear</option></select></div>
+    <div class="fg"><label>Area / Stage</label><select><option>All Areas</option><option>Cutting</option><option>Sewing</option><option>Finishing</option><option>Packing</option></select></div>
+    <div class="fg"><label>Trigger / Reason</label><select><option>All Triggers</option><option>Routine Random</option><option>Follow-up</option><option>New Line</option><option>Complaint</option><option>Pre-shipment</option></select></div>
+    <div class="fg"><label>AQL Result</label><select><option>All</option><option>Accept</option><option>Reject</option></select></div>
+    <div class="fg"><label>Date From</label><input type="date" value="2024-01-01"></div>
+    <div class="fg"><label>Date To</label><input type="date" value="2024-06-30"></div>
+  </div>
+
+  <div class="slabel">Spot Check Details — Date · Time · Inspector · Factory Type · Area / Stage · Trigger / Reason</div>
+  <div class="krow k5">
+    <div class="kcard b"><div class="kl">Total Spot Checks</div><div class="kv b">147</div><div class="ks">This period</div></div>
+    <div class="kcard g"><div class="kl">AQL Accept Rate</div><div class="kv g">72.1%</div><div class="ks">Section 5 &amp; 8 — Accept outcomes</div></div>
+    <div class="kcard r"><div class="kl">Avg Defective %</div><div class="kv r">5.6%</div><div class="ks">Across spot-checked lots</div></div>
+    <div class="kcard y"><div class="kl">Most Common Trigger</div><div class="kv y" style="font-size:16px">Follow-up</div><div class="ks">42% of all spot checks</div></div>
+    <div class="kcard o"><div class="kl">Overall Result: Reject</div><div class="kv o">31</div><div class="ks">CAPA required</div></div>
+  </div>
+
+  <div class="cgrid c2">
+    <div class="ccard">
+      <div class="ccard-head"><h3>AQL Spot Results by Trigger / Reason <span>(Accept / Reject — Sec 5 &amp; 8)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t7c1"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Document Audit — Radar <span>(Available % vs Not Available % per document)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t7c2"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="slabel">In-Process Checks (OK / Not OK / N-A) · Findings/Defects List · Bulk Conformity (Sec 6)</div>
+  <div class="cgrid c3">
+    <div class="ccard">
+      <div class="ccard-head"><h3>In-Process Checks — Radar <span>(OK % vs Not OK % per category)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap" style="height:220px"><canvas id="t7c3"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Findings — Defect Severity <span>(Severity field)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t7c4"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Bulk Conformity <span>(Section 6 — OK / Not OK)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t7c5"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="slabel">AQL Spot Inspection Sec 8 — Pcs Available · Inspected · Majors · Minors · Rejected · Defective % · Acceptance</div>
+  <div class="krow k4">
+    <div class="kcard b"><div class="kl">Pcs Available (Sec 8)</div><div class="kv b">8,240</div><div class="ks">Total across spot checks</div></div>
+    <div class="kcard g"><div class="kl">Pcs Inspected (Sec 8)</div><div class="kv g">1,648</div><div class="ks">20% sample rate</div></div>
+    <div class="kcard r"><div class="kl">No. Pcs Rejected (Sec 8)</div><div class="kv r">92</div><div class="ks">5.6% defective</div></div>
+    <div class="kcard y"><div class="kl">Total Majors (Sec 8)</div><div class="kv y">138</div><div class="ks">Across all spot lots</div></div>
+  </div>
+
+  <div class="tcard">
+    <div class="tcard-head">Spot Check Log — Style &amp; PO Info · Spot Check Details · Section 5 AQL · Section 8 AQL · Overall Result</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Date</th><th>Time</th><th>Factory</th><th>Style</th><th>PO #</th><th>Area / Stage</th><th>Trigger / Reason</th><th>Pcs Inspected</th><th>Total Majors</th><th>Total Minors</th><th>Defective %</th><th>Sec 5 Result</th><th>Pcs Rejected (Sec 8)</th><th>Acceptance</th><th>Overall Result</th></tr></thead>
+        <tbody>
+          <tr><td>2024-06-01</td><td>09:30</td><td>Factory A</td><td>2024-KN-001</td><td>PO-2401</td><td>Sewing</td><td>Routine Random</td><td>120</td><td>4</td><td>9</td><td>2.1%</td><td><span class="pill pass">Accept</span></td><td>0</td><td><span class="pill pass">Ac</span></td><td><span class="pill pass">Pass</span></td></tr>
+          <tr><td>2024-06-02</td><td>11:00</td><td>Factory B</td><td>2024-WV-045</td><td>PO-2402</td><td>Finishing</td><td>Follow-up</td><td>80</td><td>19</td><td>28</td><td>11.4%</td><td><span class="pill fail">Reject</span></td><td>9</td><td><span class="pill fail">Re</span></td><td><span class="pill fail">Fail</span></td></tr>
+          <tr><td>2024-06-03</td><td>14:15</td><td>Factory C</td><td>2024-KN-112</td><td>PO-2403</td><td>Packing</td><td>Pre-shipment</td><td>150</td><td>6</td><td>14</td><td>3.2%</td><td><span class="pill pass">Accept</span></td><td>2</td><td><span class="pill pass">Ac</span></td><td><span class="pill pass">Pass</span></td></tr>
+          <tr><td>2024-06-04</td><td>10:00</td><td>Factory B</td><td>2024-WV-045</td><td>PO-2402</td><td>Sewing</td><td>Complaint</td><td>100</td><td>22</td><td>31</td><td>13.8%</td><td><span class="pill fail">Reject</span></td><td>14</td><td><span class="pill fail">Re</span></td><td><span class="pill fail">Fail</span></td></tr>
+          <tr><td>2024-06-05</td><td>09:00</td><td>Factory A</td><td>2024-KN-201</td><td>PO-2404</td><td>Cutting</td><td>New Line</td><td>90</td><td>1</td><td>5</td><td>1.1%</td><td><span class="pill pass">Accept</span></td><td>0</td><td><span class="pill pass">Ac</span></td><td><span class="pill pass">Pass</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="irow i2">
+    <div class="icard r"><div class="iico">🔍</div><div class="ibody"><h4>Factory B: 100% Reject Rate on Follow-up &amp; Complaint Checks</h4><p>All Spot Check visits to Factory B triggered by "Follow-up" or "Complaint" resulted in AQL Reject (Sec 5 &amp; 8). This indicates the root cause identified in prior CAPA items has not been resolved — Prior Report Ref should be cross-referenced to confirm CAP closure status.</p></div></div>
+    <div class="icard y"><div class="iico">📋</div><div class="ibody"><h4>Document Audit: Tech Pack Missing in 28% of Checks</h4><p>The Document Audit section shows Tech Pack (TP) marked "Not Available" in 28% of spot checks — the highest missing rate among the 8 audited documents. Without TP on the floor, sewing workmanship vs. tech pack in-process checks cannot be accurately performed.</p></div></div>
+  </div>
+
+  <div class="api-section">
+    <div class="slabel" style="margin-top:28px">API Details — Spot Check Template</div>
+    <div class="api-meta">
+      <span class="api-baseurl">Base URL: <code>https://api.lyy-qc.com/v1</code></span>
+      <span class="api-tag">REST · JSON · Bearer Token</span>
+    </div>
+    <div class="api-grid">
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/spot-check/records</div><div class="api-desc">List spot check records filterable by factory, style, factory type, area/stage, trigger reason, AQL result, and date range.</div><div class="api-params"><em>Params</em> factory_id, style, factory_type, area (cutting|sewing|finishing|packing), trigger (routine|follow_up|new_line|complaint|pre_shipment), aql_result, date_from, date_to</div></div></div>
+      <div class="api-card"><div class="api-badge post">POST</div><div><div class="api-endpoint">/spot-check/records</div><div class="api-desc">Submit a new spot check record with Style &amp; PO info, spot check details (date, time, inspector, area, trigger), and overall conclusion.</div><div class="api-params"><em>Body</em> factory_id, style, po_number, check_date, check_time, area, trigger, inspector_id, prior_report_ref</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/spot-check/aql-sec5/{id}</div><div class="api-desc">Section 5 AQL spot inspection results: pcs inspected, total majors, total minors, defective %, and acceptance (Ac/Re) outcome.</div><div class="api-params"><em>Params</em> check_id</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/spot-check/aql-sec8/{id}</div><div class="api-desc">Section 8 AQL spot inspection results: pcs available, pcs inspected, number of pieces rejected, total majors, and acceptance (Ac/Re) outcome.</div><div class="api-params"><em>Params</em> check_id</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/spot-check/document-audit/{id}</div><div class="api-desc">Document audit availability for 8 required documents (Tech Pack, PO, PPS/Sealed, Fabric, Accessory, Trim Card, Packing, Size Spec) with Available/Not Available/N-A per item.</div><div class="api-params"><em>Params</em> check_id</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/spot-check/in-process/{id}</div><div class="api-desc">In-process check results across 8 categories (Cut Layer, Cut Panel, Plaid Align, Sew Workmanship, Bulk Press, Final Proc, Labelling, Packaging) with OK/Not OK/N-A status.</div><div class="api-params"><em>Params</em> check_id</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/spot-check/bulk-conformity/{id}</div><div class="api-desc">Bulk conformity Section 6 results across 9 check points (Fit on Dummy, Bulk vs TP, Bulk Fabric, Colour/Shading, Emb/Print, Measurement, Label, Carton, Silica Gel).</div><div class="api-params"><em>Params</em> check_id</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/spot-check/capa/{id}</div><div class="api-desc">CAPA &amp; Conclusion data: CAPA required flag, overall result (Pass/Fail), corrective action description, target closure date, and prior report cross-reference.</div><div class="api-params"><em>Params</em> check_id</div></div></div>
+      <div class="api-card"><div class="api-badge put">PUT</div><div><div class="api-endpoint">/spot-check/records/{id}/capa</div><div class="api-desc">Update CAPA status for a spot check: mark as resolved, attach evidence, set closure date, and update the overall result if re-inspection passed.</div><div class="api-params"><em>Body</em> capa_status, evidence_url, closure_date, re_inspection_result, updated_by</div></div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<script>
+// ── nav ──────────────────────────────────────────
+function show(id,idx){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.tab')[idx].classList.add('active');
+}
+
+// ── palette & shared options ─────────────────────
+const C={
+  blue:'#5b73f9',purple:'#8b6afc',green:'#10b981',
+  yellow:'#f59e0b',red:'#f43f5e',orange:'#f97316',teal:'#06b6d4',pink:'#ec4899',
+  bA:'rgba(91,115,249,.18)',gA:'rgba(16,185,129,.18)',rA:'rgba(244,63,94,.18)',yA:'rgba(245,158,11,.18)',
+};
+const G={color:'rgba(37,42,69,.65)'};
+const T={color:'#94a3b8',font:{family:"'Inter','Segoe UI',sans-serif",size:11}};
+const TIP={backgroundColor:'#1c2138',borderColor:'#252a45',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8',padding:10,cornerRadius:6};
+const LEG={labels:{color:'#94a3b8',boxWidth:10,font:{size:11,family:"'Inter','Segoe UI',sans-serif"}}};
+const BASE={
+  responsive:true,maintainAspectRatio:false,
+  plugins:{legend:LEG,tooltip:TIP},
+  scales:{x:{ticks:T,grid:G},y:{ticks:T,grid:G}}
+};
+// Radar base
+const RBASE={
+  responsive:true,maintainAspectRatio:false,
+  plugins:{legend:LEG,tooltip:TIP},
+  scales:{r:{min:0,max:100,angleLines:{color:'rgba(37,42,69,.8)'},grid:{color:'rgba(37,42,69,.8)'},pointLabels:{color:'#94a3b8',font:{size:10,family:"'Inter','Segoe UI',sans-serif"}},ticks:{color:'#94a3b8',backdropColor:'transparent',stepSize:25,font:{size:9}}}}
+};
+// Polar base
+const PBASE={
+  responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{position:'right',labels:{color:'#94a3b8',boxWidth:10,font:{size:11}}},tooltip:TIP},
+  scales:{r:{ticks:{color:'#94a3b8',backdropColor:'transparent',font:{size:9}},grid:{color:'rgba(37,42,69,.7)'}}}
+};
+// Line base
+const LBASE={...BASE,elements:{line:{tension:.4},point:{radius:4,hoverRadius:6,borderWidth:2}}};
+
+function mk(id,cfg){new Chart(document.getElementById(id),cfg)}
+
+// ══ T1 — DAILY CHECK ═══════════════════════════
+
+// Grouped bar: machine utilization
+mk('t1c1',{type:'bar',data:{
+  labels:['Line 1','Line 2','Line 3','Line 4'],
+  datasets:[
+    {label:'Machines Allocated',data:[32,28,30,25],backgroundColor:C.bA,borderRadius:5,borderSkipped:false},
+    {label:'Machines Running',data:[29,21,22,20],backgroundColor:C.blue,borderRadius:5,borderSkipped:false}
+  ]
+},options:{...BASE}});
+
+// Line: WIP weekly progression (area fill)
+mk('t1c2',{type:'line',data:{
+  labels:['Week 1','Week 2','Week 3','Week 4','Week 5','Week 6'],
+  datasets:[
+    {label:'Cutting',data:[1200,2400,3200,4000,4600,4800],borderColor:C.teal,backgroundColor:'rgba(6,182,212,.12)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:C.teal},
+    {label:'Sewing',data:[400,1200,2400,3200,3800,4200],borderColor:C.green,backgroundColor:'rgba(16,185,129,.12)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:C.green},
+    {label:'Finishing',data:[0,400,1000,1600,2200,2600],borderColor:C.yellow,backgroundColor:'rgba(245,158,11,.10)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:C.yellow},
+    {label:'Packed',data:[0,0,400,900,1400,1900],borderColor:C.orange,backgroundColor:'rgba(249,115,22,.10)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:C.orange}
+  ]
+},options:{...LBASE,scales:{x:{ticks:T,grid:G},y:{ticks:T,grid:G,min:0,title:{display:true,text:'Units',color:'#94a3b8',font:{size:11}}}}}});
+
+// Radar: in-process checks
+mk('t1c3',{type:'radar',data:{
+  labels:['Cut Layer','Cut Panel','Plaid Align','Cut Progress','Sew Wkmnshp','Sew Schedule','Bulk Press','Final Proc','Labelling'],
+  datasets:[
+    {label:'OK %',data:[91.7,85.4,79.2,93.8,77.1,83.3,81.3,87.5,95.8],backgroundColor:'rgba(16,185,129,.18)',borderColor:C.green,pointBackgroundColor:C.green,pointRadius:4,pointBorderWidth:2,borderWidth:2},
+    {label:'Not OK %',data:[8.3,14.6,18.8,6.3,20.8,14.6,16.7,10.4,5.2],backgroundColor:'rgba(244,63,94,.12)',borderColor:C.red,pointBackgroundColor:C.red,pointRadius:4,pointBorderWidth:2,borderWidth:2}
+  ]
+},options:{...RBASE}});
+
+// Doughnut: defect checklist
+mk('t1c4',{type:'doughnut',data:{
+  labels:['Sewing Defects','Garment Defects','Fabric Defects','No Defect'],
+  datasets:[{data:[42,31,18,71],backgroundColor:[C.red,C.yellow,C.orange,C.green],borderWidth:0,hoverOffset:10,borderRadius:3}]
+},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',boxWidth:10,font:{size:11},padding:12}},tooltip:TIP}}});
+
+// Horizontal stacked bar: document audit
+mk('t1c5',{type:'bar',data:{
+  labels:['Tech Pack','PO','PPS/Sealed','Fabric','Accessory','Trim Card','Packing','Size Spec'],
+  datasets:[
+    {label:'Available',data:[88,95,82,90,78,74,86,91],backgroundColor:C.green,borderRadius:3},
+    {label:'Not Available',data:[8,3,14,6,16,20,10,7],backgroundColor:C.red,borderRadius:3},
+    {label:'N-A',data:[4,2,4,4,6,6,4,2],backgroundColor:'#2e3557',borderRadius:3}
+  ]
+},options:{...BASE,indexAxis:'y',scales:{x:{stacked:true,ticks:T,grid:G},y:{stacked:true,ticks:{...T,font:{size:10}},grid:G}}}});
+
+// Doughnut: AQL result
+mk('t1c6',{type:'doughnut',data:{
+  labels:['Accept (Ac)','Reject (Re)'],
+  datasets:[{data:[87,13],backgroundColor:[C.green,C.red],borderWidth:0,hoverOffset:10,borderRadius:3}]
+},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',boxWidth:11,padding:14}},tooltip:TIP}}});
+
+// Radar: bulk conformity
+mk('t1c7',{type:'radar',data:{
+  labels:['Fit on Dummy','Bulk vs TP','Fabric/Colour','Emb/Print','Measurement','Bulk Label','Carton Mark','Silica Gel'],
+  datasets:[
+    {label:'OK %',data:[82,78,68,88,80,84,90,94],backgroundColor:'rgba(16,185,129,.18)',borderColor:C.green,pointBackgroundColor:C.green,pointRadius:4,pointBorderWidth:2,borderWidth:2},
+    {label:'Not OK %',data:[12,18,26,8,16,12,8,4],backgroundColor:'rgba(244,63,94,.12)',borderColor:C.red,pointBackgroundColor:C.red,pointRadius:4,pointBorderWidth:2,borderWidth:2}
+  ]
+},options:{...RBASE}});
+
+// ══ T2 — FABRIC INSPECTION ══════════════════════
+
+// Bar + line overlay: mill performance vs threshold
+mk('t2c1',{type:'bar',data:{
+  labels:['Mill A','Mill B','Mill C','Mill D'],
+  datasets:[
+    {type:'bar',label:'Avg Pts/100yd²',data:[17.1,31.2,22.8,24.6],backgroundColor:[C.green,C.red,C.yellow,C.yellow],borderRadius:6,borderSkipped:false},
+    {type:'line',label:'Threshold (28)',data:[28,28,28,28],borderColor:'rgba(244,63,94,.7)',borderDash:[6,4],pointRadius:0,backgroundColor:'transparent',borderWidth:2}
+  ]
+},options:{...BASE,plugins:{...BASE.plugins}}});
+
+// Stacked bar: roll results by lot
+mk('t2c2',{type:'bar',data:{
+  labels:['L-240401','L-240402','L-240415','L-240501','L-240503'],
+  datasets:[
+    {label:'Pass',data:[46,53,32,51,36],backgroundColor:C.green,borderRadius:4,borderSkipped:false},
+    {label:'Reject',data:[2,9,3,4,5],backgroundColor:C.red,borderRadius:4,borderSkipped:false}
+  ]
+},options:{...BASE,scales:{x:{stacked:true,ticks:T,grid:G},y:{stacked:true,ticks:T,grid:G}}}});
+
+// Pareto: defect codes (bar + cumulative % line, dual axis)
+mk('t2c3',{type:'bar',data:{
+  labels:['Stains','Holes','Crease Marks','Dye Patches','Barre','Drop Stitches','Others'],
+  datasets:[
+    {type:'bar',label:'Defect Count',data:[31,22,18,14,10,8,5],backgroundColor:[C.red,C.orange,C.yellow,C.blue,C.purple,C.teal,C.pink],borderRadius:4,yAxisID:'y'},
+    {type:'line',label:'Cumulative %',data:[28.7,49.1,65.7,78.7,87.9,95.4,100],borderColor:C.yellow,pointBackgroundColor:C.yellow,pointRadius:5,fill:false,tension:.3,yAxisID:'y2',borderWidth:2}
+  ]
+},options:{...BASE,scales:{x:{ticks:{...T,maxRotation:20},grid:G},y:{ticks:T,grid:G,title:{display:true,text:'Count',color:'#94a3b8',font:{size:11}}},y2:{position:'right',min:0,max:100,ticks:{...T,callback:v=>v+'%'},grid:{display:false}}}}});
+
+// Radar: shade / physical check pass rate
+mk('t2c4',{type:'radar',data:{
+  labels:['Centre-Selvedge','Side-Side','End-End','Roll-Roll','Width Cons.','GSM vs Spec','Skew/Bow %','Hand-feel'],
+  datasets:[
+    {label:'Pass %',data:[78,82,91,86,94,89,96,88],backgroundColor:'rgba(91,115,249,.18)',borderColor:C.blue,pointBackgroundColor:C.blue,pointRadius:4,pointBorderWidth:2,borderWidth:2}
+  ]
+},options:{...RBASE}});
+
+// Horizontal stacked bar: lab tests
+mk('t2c5',{type:'bar',data:{
+  labels:['Shrinkage (Wash)','Shrinkage (Dry)','Crocking CF','Wash CF','GSM/Weight','Spirality','pH / Other'],
+  datasets:[
+    {label:'Pass',data:[88,91,82,78,86,90,94],backgroundColor:C.green,borderRadius:3},
+    {label:'Fail',data:[12,9,18,22,14,10,6],backgroundColor:C.red,borderRadius:3}
+  ]
+},options:{...BASE,indexAxis:'y',scales:{x:{stacked:true,ticks:T,grid:G},y:{stacked:true,ticks:{...T,font:{size:10}},grid:G}}}});
+
+// ══ T3 — FIELD AUDITOR ══════════════════════════
+
+// Horizontal bar: compliance scores (color-coded)
+mk('t3c1',{type:'bar',data:{
+  labels:['Factory A','Factory C','Factory E','Factory G','Factory F','Factory B','Factory H','Factory D'],
+  datasets:[{label:'Compliance %',data:[93,88,85,84,79,71,65,58],backgroundColor:['rgba(16,185,129,.8)','rgba(16,185,129,.8)','rgba(16,185,129,.8)','rgba(16,185,129,.8)','rgba(245,158,11,.8)','rgba(245,158,11,.8)','rgba(244,63,94,.8)','rgba(244,63,94,.8)'],borderRadius:5,borderSkipped:false}]
+},options:{...BASE,indexAxis:'y',plugins:{...BASE.plugins,legend:{display:false}},scales:{x:{min:0,max:100,ticks:{...T,callback:v=>v+'%'},grid:G},y:{ticks:T,grid:G}}}});
+
+// Stacked bar: ESG gates
+mk('t3c2',{type:'bar',data:{
+  labels:['Child Labour','Locked Exits','Forced Labour','Chem Mgmt','Hidden Sub-con','Building Safety'],
+  datasets:[
+    {label:'Pass',data:[14,12,14,12,13,14],backgroundColor:C.green,borderRadius:4,borderSkipped:false},
+    {label:'Fail',data:[0,2,0,2,1,0],backgroundColor:C.red,borderRadius:4,borderSkipped:false}
+  ]
+},options:{...BASE,scales:{x:{stacked:true,ticks:T,grid:G},y:{stacked:true,ticks:T,grid:G}}}});
+
+// Polar area: workforce distribution
+mk('t3c3',{type:'polarArea',data:{
+  labels:['Sewing Ops','Cutting Ops','Pressing','Packing','Inline QC','Sample Sewer','Pattern Maker','Mechanics'],
+  datasets:[{data:[94,38,18,24,7,6,4,12],backgroundColor:['rgba(16,185,129,.75)','rgba(91,115,249,.75)','rgba(6,182,212,.75)','rgba(139,106,252,.75)','rgba(245,158,11,.75)','rgba(249,115,22,.75)','rgba(244,63,94,.75)','rgba(236,72,153,.75)'],borderWidth:0}]
+},options:{...PBASE}});
+
+// Grouped bar: machine inventory
+mk('t3c4',{type:'bar',data:{
+  labels:['Factory A','Factory B','Factory C','Factory D'],
+  datasets:[
+    {label:'Knit (6K)',data:[0,0,48,0],backgroundColor:C.blue,borderRadius:3,borderSkipped:false},
+    {label:'CnS (6C)',data:[142,98,22,112],backgroundColor:C.purple,borderRadius:3,borderSkipped:false},
+    {label:'Finish (6F)',data:[28,18,12,24],backgroundColor:C.teal,borderRadius:3,borderSkipped:false}
+  ]
+},options:{...BASE,scales:{x:{ticks:T,grid:G},y:{ticks:T,grid:G}}}});
+
+// Doughnut: CAP status
+mk('t3c5',{type:'doughnut',data:{
+  labels:['Closed','In Progress','Overdue','Not Started'],
+  datasets:[{data:[28,18,8,5],backgroundColor:[C.green,C.blue,C.red,C.yellow],borderWidth:0,hoverOffset:10,borderRadius:3}]
+},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',boxWidth:11,padding:12}},tooltip:TIP}}});
+
+// ══ T4 — FINAL INSPECTION ═══════════════════════
+
+// Stacked bar: workmanship defects
+mk('t4c1',{type:'bar',data:{
+  labels:['Open Seams','Skip Stitches','Colour Var.','Uncut Threads','Poor Press','Mis-Align','Puckering','Raw Edges'],
+  datasets:[
+    {label:'CRIT',data:[1,0,0,0,0,0,0,0],backgroundColor:C.red,borderRadius:3,borderSkipped:false},
+    {label:'MAJ',data:[89,54,12,0,0,31,18,14],backgroundColor:C.orange,borderRadius:3,borderSkipped:false},
+    {label:'MIN',data:[38,31,61,67,51,14,14,14],backgroundColor:C.yellow,borderRadius:3,borderSkipped:false}
+  ]
+},options:{...BASE,scales:{x:{stacked:true,ticks:{...T,maxRotation:30},grid:G},y:{stacked:true,ticks:T,grid:G}}}});
+
+// Bubble: defect position (x=position, y=count, r=relative severity)
+mk('t4c2',{type:'bubble',data:{
+  datasets:[
+    {label:'Side Seam',data:[{x:1,y:62,r:14}],backgroundColor:'rgba(244,63,94,.75)',borderColor:'rgba(244,63,94,.3)',borderWidth:1},
+    {label:'Shoulder',data:[{x:2,y:48,r:12}],backgroundColor:'rgba(249,115,22,.75)',borderColor:'rgba(249,115,22,.3)',borderWidth:1},
+    {label:'Armhole',data:[{x:3,y:41,r:11}],backgroundColor:'rgba(245,158,11,.75)',borderColor:'rgba(245,158,11,.3)',borderWidth:1},
+    {label:'Neckline',data:[{x:4,y:39,r:10}],backgroundColor:'rgba(139,106,252,.75)',borderColor:'rgba(139,106,252,.3)',borderWidth:1},
+    {label:'Body Panel',data:[{x:5,y:38,r:10}],backgroundColor:'rgba(91,115,249,.75)',borderColor:'rgba(91,115,249,.3)',borderWidth:1},
+    {label:'Sleeve',data:[{x:6,y:29,r:8}],backgroundColor:'rgba(6,182,212,.75)',borderColor:'rgba(6,182,212,.3)',borderWidth:1},
+    {label:'Hem',data:[{x:7,y:24,r:7}],backgroundColor:'rgba(16,185,129,.75)',borderColor:'rgba(16,185,129,.3)',borderWidth:1},
+    {label:'Pocket',data:[{x:8,y:18,r:6}],backgroundColor:'rgba(236,72,153,.75)',borderColor:'rgba(236,72,153,.3)',borderWidth:1},
+    {label:'Collar',data:[{x:9,y:12,r:5}],backgroundColor:'rgba(255,255,255,.25)',borderColor:'rgba(255,255,255,.5)',borderWidth:1}
+  ]
+},options:{
+  ...BASE,
+  scales:{
+    x:{min:0,max:10,ticks:{...T,callback:v=>{const m=['','Side Seam','Shoulder','Armhole','Neckline','Body Panel','Sleeve','Hem','Pocket','Collar'];return m[Math.round(v)]||''},maxRotation:30},grid:G},
+    y:{ticks:T,grid:G,min:0,title:{display:true,text:'Defect Count',color:'#94a3b8',font:{size:11}}}
+  },
+  plugins:{tooltip:TIP,legend:{position:'right',labels:{color:'#94a3b8',boxWidth:8,font:{size:10},padding:8}}}
+}});
+
+// Radar: checkpoint results
+mk('t4c3',{type:'radar',data:{
+  labels:['Sewing','Trimming','Labelling','Measurements','Packing','Fabric','Vacuum Pack'],
+  datasets:[
+    {label:'OK %',data:[84,90,88,78,92,76,95],backgroundColor:'rgba(16,185,129,.18)',borderColor:C.green,pointBackgroundColor:C.green,pointRadius:4,pointBorderWidth:2,borderWidth:2},
+    {label:'Not Conform %',data:[16,10,12,22,8,24,5],backgroundColor:'rgba(244,63,94,.12)',borderColor:C.red,pointBackgroundColor:C.red,pointRadius:4,pointBorderWidth:2,borderWidth:2}
+  ]
+},options:{...RBASE}});
+
+// Horizontal bar: safety compliance %
+mk('t4c4',{type:'bar',data:{
+  labels:['Needle Log','Broken Needle Rec.','Needle Transfer Box','100% Metal Det.','MD Calibration','Metal-Free Zone','Sharp Bindings'],
+  datasets:[{label:'Yes %',data:[91,72,86,84,88,74,89],backgroundColor:d=>d.raw<80?C.red:d.raw<90?C.yellow:C.green,borderRadius:4}]
+},options:{...BASE,indexAxis:'y',plugins:{...BASE.plugins,legend:{display:false}},scales:{x:{min:0,max:100,ticks:{...T,callback:v=>v+'%'},grid:G},y:{ticks:{...T,font:{size:10}},grid:G}}}});
+
+// Horizontal stacked bar: accessories
+mk('t4c5',{type:'bar',data:{
+  labels:['Zipper','Lining','Polybag','Hang Tag','Price Ticket','Buttons','Care Label','Main Label','Factory ID'],
+  datasets:[
+    {label:'Present',data:[94,88,96,91,89,92,86,98,95],backgroundColor:C.green,borderRadius:3},
+    {label:'Missing',data:[6,12,4,9,11,8,14,2,5],backgroundColor:C.red,borderRadius:3}
+  ]
+},options:{...BASE,indexAxis:'y',scales:{x:{stacked:true,ticks:T,grid:G},y:{stacked:true,ticks:{...T,font:{size:10}},grid:G}}}});
+
+// ══ T5 — INLINE INSPECTION ══════════════════════
+
+// Line: production stage weekly trend (filled)
+mk('t5c1',{type:'line',data:{
+  labels:['Week 1','Week 2','Week 3','Week 4'],
+  datasets:[
+    {label:'Emb/Print Outside',data:[250,500,650,1300],borderColor:C.teal,backgroundColor:'rgba(6,182,212,.12)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:C.teal},
+    {label:'Cutting Pieces',data:[800,2000,3400,4800],borderColor:C.blue,backgroundColor:'rgba(91,115,249,.12)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:C.blue},
+    {label:'Semi Finished',data:[0,700,2100,3600],borderColor:C.purple,backgroundColor:'rgba(139,106,252,.10)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:C.purple},
+    {label:'Finished',data:[0,150,900,2400],borderColor:C.green,backgroundColor:'rgba(16,185,129,.10)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:C.green}
+  ]
+},options:{...LBASE,scales:{x:{ticks:T,grid:G},y:{ticks:T,grid:G,min:0,title:{display:true,text:'Units',color:'#94a3b8',font:{size:11}}}}}});
+
+// Grouped bar: final process status
+mk('t5c2',{type:'bar',data:{
+  labels:['Factory A','Factory B','Factory C'],
+  datasets:[
+    {label:'Trimming',data:[1100,780,760],backgroundColor:C.blue,borderRadius:3,borderSkipped:false},
+    {label:'Final Pressing',data:[900,620,640],backgroundColor:C.teal,borderRadius:3,borderSkipped:false},
+    {label:'Packing',data:[650,420,480],backgroundColor:C.green,borderRadius:3,borderSkipped:false}
+  ]
+},options:{...BASE,scales:{x:{ticks:T,grid:G},y:{ticks:T,grid:G}}}});
+
+// Stacked bar: inline workmanship defects
+mk('t5c3',{type:'bar',data:{
+  labels:['Open Seams','Skip Stitch','Uncut Thread','Colour Var.','Puckering','Mis-Align','Raw Edges','Poor Press'],
+  datasets:[
+    {label:'CRIT',data:[0,2,0,0,0,0,0,0],backgroundColor:C.red,borderRadius:3,borderSkipped:false},
+    {label:'MAJ',data:[54,31,0,12,18,21,14,0],backgroundColor:C.orange,borderRadius:3,borderSkipped:false},
+    {label:'MIN',data:[35,22,48,0,14,10,14,41],backgroundColor:C.yellow,borderRadius:3,borderSkipped:false}
+  ]
+},options:{...BASE,scales:{x:{stacked:true,ticks:{...T,maxRotation:30},grid:G},y:{stacked:true,ticks:T,grid:G}}}});
+
+// Radar: inline checkpoint list
+mk('t5c4',{type:'radar',data:{
+  labels:['Sewing','Trimming','Labelling','Measurements','Packing','Fabric','Vacuum Pack'],
+  datasets:[
+    {label:'OK %',data:[78,88,84,72,90,70,92],backgroundColor:'rgba(91,115,249,.18)',borderColor:C.blue,pointBackgroundColor:C.blue,pointRadius:4,pointBorderWidth:2,borderWidth:2},
+    {label:'Not Conform %',data:[22,12,16,28,10,30,8],backgroundColor:'rgba(244,63,94,.12)',borderColor:C.red,pointBackgroundColor:C.red,pointRadius:4,pointBorderWidth:2,borderWidth:2}
+  ]
+},options:{...RBASE}});
+
+// Horizontal bar: inline safety compliance
+mk('t5c5',{type:'bar',data:{
+  labels:['Needle Log','Broken Needle','Needle Box','100% Metal Det.','MD Calibration','Metal-Free Zone','Sharp Bindings'],
+  datasets:[{label:'Compliance %',data:[94,78,88,82,90,74,92],backgroundColor:C.purple,borderRadius:4}]
+},options:{...BASE,indexAxis:'y',plugins:{...BASE.plugins,legend:{display:false}},scales:{x:{min:0,max:100,ticks:{...T,callback:v=>v+'%'},grid:G},y:{ticks:{...T,font:{size:10}},grid:G}}}});
+
+// ══ T6 — PP MEETING ═════════════════════════════
+
+// Line: slippage trend by PO (filled area)
+mk('t6c1',{type:'line',data:{
+  labels:['PO-2401','PO-2402','PO-2403','PO-2404','PO-2405','PO-2406','PO-2407','PO-2408'],
+  datasets:[
+    {label:'Cut Slippage (days)',data:[0,6,3,0,7,2,4,1],borderColor:C.blue,backgroundColor:'rgba(91,115,249,.12)',fill:true,tension:.4,pointRadius:5,pointBackgroundColor:C.blue,pointBorderWidth:2,borderWidth:2.5},
+    {label:'Sew Slippage (days)',data:[1,10,3,0,9,4,7,2],borderColor:C.red,backgroundColor:'rgba(244,63,94,.12)',fill:true,tension:.4,pointRadius:5,pointBackgroundColor:C.red,pointBorderWidth:2,borderWidth:2.5}
+  ]
+},options:{...LBASE,scales:{x:{ticks:{...T,maxRotation:20},grid:G},y:{ticks:T,grid:G,min:0,title:{display:true,text:'Days Delayed',color:'#94a3b8',font:{size:11}}}}}});
+
+// Stacked bar: approval status
+mk('t6c2',{type:'bar',data:{
+  labels:['PP Approved','Green Tag Sample','Size Set Status'],
+  datasets:[
+    {label:'Yes',data:[30,27,32],backgroundColor:C.green,borderRadius:4,borderSkipped:false},
+    {label:'No',data:[5,8,4],backgroundColor:C.red,borderRadius:4,borderSkipped:false},
+    {label:'Pending',data:[3,3,2],backgroundColor:C.yellow,borderRadius:4,borderSkipped:false}
+  ]
+},options:{...BASE,scales:{x:{stacked:true,ticks:T,grid:G},y:{stacked:true,ticks:T,grid:G}}}});
+
+// Doughnut: season distribution
+mk('t6c3',{type:'doughnut',data:{
+  labels:['SS 2024','AW 2024','SS 2025','AW 2025'],
+  datasets:[{data:[18,12,6,2],backgroundColor:[C.blue,C.teal,C.green,C.purple],borderWidth:0,hoverOffset:10,borderRadius:3}]
+},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',boxWidth:11,padding:12}},tooltip:TIP}}});
+
+// Doughnut: production country split
+mk('t6c4',{type:'doughnut',data:{
+  labels:['China','Vietnam','Bangladesh','Cambodia'],
+  datasets:[{data:[28,6,2,2],backgroundColor:[C.blue,C.orange,C.green,C.yellow],borderWidth:0,hoverOffset:10,borderRadius:3}]
+},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',boxWidth:11,padding:12}},tooltip:TIP}}});
+
+// Stacked bar: order completion rate
+mk('t6c5',{type:'bar',data:{
+  labels:['Factory A','Factory B','Factory C','Factory D'],
+  datasets:[
+    {label:'On Track',data:[8,3,5,2],backgroundColor:C.green,borderRadius:4,borderSkipped:false},
+    {label:'At Risk',data:[1,4,2,1],backgroundColor:C.yellow,borderRadius:4,borderSkipped:false},
+    {label:'Critical',data:[0,3,0,2],backgroundColor:C.red,borderRadius:4,borderSkipped:false}
+  ]
+},options:{...BASE,scales:{x:{stacked:true,ticks:T,grid:G},y:{stacked:true,ticks:T,grid:G}}}});
+
+// ══ T7 — SPOT CHECK ═════════════════════════════
+
+// Stacked bar: AQL results by trigger
+mk('t7c1',{type:'bar',data:{
+  labels:['Routine Random','Follow-up','New Line','Complaint','Pre-shipment'],
+  datasets:[
+    {label:'Accept',data:[28,14,18,4,42],backgroundColor:C.green,borderRadius:4,borderSkipped:false},
+    {label:'Reject',data:[4,14,2,8,3],backgroundColor:C.red,borderRadius:4,borderSkipped:false}
+  ]
+},options:{...BASE,scales:{x:{stacked:true,ticks:T,grid:G},y:{stacked:true,ticks:T,grid:G}}}});
+
+// Radar: document audit availability
+mk('t7c2',{type:'radar',data:{
+  labels:['Tech Pack','PO Doc','PPS/Sealed','Fabric Doc','Accessory','Trim Card','Packing','Size Spec'],
+  datasets:[
+    {label:'Available %',data:[72,92,78,88,74,70,84,90],backgroundColor:'rgba(91,115,249,.18)',borderColor:C.blue,pointBackgroundColor:C.blue,pointRadius:4,pointBorderWidth:2,borderWidth:2},
+    {label:'Not Available %',data:[24,6,18,8,20,26,12,8],backgroundColor:'rgba(244,63,94,.12)',borderColor:C.red,pointBackgroundColor:C.red,pointRadius:4,pointBorderWidth:2,borderWidth:2}
+  ]
+},options:{...RBASE}});
+
+// Radar: in-process check results
+mk('t7c3',{type:'radar',data:{
+  labels:['Cut Layer','Cut Panel','Plaid Align','Sew Wkmnshp','Bulk Press','Final Proc','Labelling','Packaging'],
+  datasets:[
+    {label:'OK %',data:[80,74,68,62,70,76,82,88],backgroundColor:'rgba(16,185,129,.18)',borderColor:C.green,pointBackgroundColor:C.green,pointRadius:4,pointBorderWidth:2,borderWidth:2},
+    {label:'Not OK %',data:[16,22,28,34,24,18,14,10],backgroundColor:'rgba(244,63,94,.12)',borderColor:C.red,pointBackgroundColor:C.red,pointRadius:4,pointBorderWidth:2,borderWidth:2}
+  ]
+},options:{...RBASE}});
+
+// Doughnut: findings severity
+mk('t7c4',{type:'doughnut',data:{
+  labels:['Critical','Major','Minor'],
+  datasets:[{data:[8,92,47],backgroundColor:[C.red,C.orange,C.yellow],borderWidth:0,hoverOffset:10,borderRadius:3}]
+},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',boxWidth:11,padding:12}},tooltip:TIP}}});
+
+// Horizontal stacked bar: bulk conformity
+mk('t7c5',{type:'bar',data:{
+  labels:['Fit on Dummy','Bulk vs TP','Bulk Fabric','Colour/Shading','Emb/Print','Measurement','Bulk Label','Carton Mark','Silica Gel'],
+  datasets:[
+    {label:'OK',data:[74,68,60,58,80,70,78,84,90],backgroundColor:C.green,borderRadius:3},
+    {label:'Not OK',data:[20,28,34,38,14,24,18,12,8],backgroundColor:C.red,borderRadius:3},
+    {label:'N-A',data:[6,4,6,4,6,6,4,4,2],backgroundColor:'#2e3557',borderRadius:3}
+  ]
+},options:{...BASE,indexAxis:'y',scales:{x:{stacked:true,ticks:T,grid:G},y:{stacked:true,ticks:{...T,font:{size:10}},grid:G}}}});
+</script>
+</body>
+</html>
