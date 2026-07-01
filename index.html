@@ -170,7 +170,7 @@ tbody tr:last-child td{border-bottom:none}
   <div class="slabel">Visit Details &amp; Machine Utilization</div>
   <div class="krow k5">
     <div class="kcard b"><div class="kl">Machine Utilization Rate</div><div class="kv b">83.6%</div><div class="ks">Running / Allocated machines</div><div class="pbar"><div class="pfill b" style="width:83.6%"></div></div></div>
-    <div class="kcard g"><div class="kl">Sewer Productivity</div><div class="kv g">18.4</div><div class="ks">Pcs sewn / sewer / day</div><div class="kt up">↑ +2.1 vs prev week</div></div>
+    <div class="kcard g"><div class="kl">Sewer Productivity</div><div class="kv g">18.4</div><div class="ks">Derived: Sewing qty ÷ Sewer Headcount ÷ days in period</div><div class="kt up">↑ +2.1 vs prev week</div></div>
     <div class="kcard y"><div class="kl">Machines Allocated</div><div class="kv y">90</div><div class="ks">Total across active lines</div></div>
     <div class="kcard t"><div class="kl">Sewer Headcount</div><div class="kv t">78</div><div class="ks">Active sewers on floor</div></div>
     <div class="kcard o"><div class="kl">Total Daily Visits</div><div class="kv o">312</div><div class="ks">Inspections this period</div></div>
@@ -225,7 +225,7 @@ tbody tr:last-child td{border-bottom:none}
       <div class="ccard-body"><div class="chart-wrap"><canvas id="t1c6"></canvas></div></div>
     </div>
     <div class="ccard">
-      <div class="ccard-head"><h3>Bulk Conformity — Radar <span>(OK % vs Not OK % across 8 checks)</span></h3></div>
+      <div class="ccard-head"><h3>Bulk Conformity — Radar <span>(OK % vs Not OK % across 10 checks)</span></h3></div>
       <div class="ccard-body"><div class="chart-wrap"><canvas id="t1c7"></canvas></div></div>
     </div>
   </div>
@@ -375,7 +375,7 @@ tbody tr:last-child td{border-bottom:none}
 <div class="sec-inner">
   <div class="hdr">
     <h2>Field Auditor Template <span class="file-tag">LYY_Field_Auditor_Template_v2.xlsx</span></h2>
-    <p>Sheets: Cover · Pre-Visit · Company · Business · Workforce · Mach-Knit · Mach-CnS · Mach-Finish · Sample Room · Sampling · Fabric Trims · Prod Flow · Compliance · QC Equipment · Non-Neg · Post-Visit</p>
+    <p>Sheets: 1. Cover · 2. Pre-Visit · 3. Company · 4. Business · 5. Workforce · 6K. Mach-Knit · 6C. Mach-CnS · 6F. Mach-Finish · 7. Sample Room · 8. Sampling · 9. Fabric Trims · 10. Prod Flow · 11. Compliance · 12. QC Equipment · 13. Non-Neg · 14. Observations · 15. Photo Log · 16. Post-Visit</p>
   </div>
 
   <div class="filters">
@@ -391,7 +391,7 @@ tbody tr:last-child td{border-bottom:none}
   <div class="slabel">Cover — Factory Size · Total Machines · Workforce · Peak Monthly Capacity · Audit Date</div>
   <div class="krow k5">
     <div class="kcard b"><div class="kl">Avg Compliance Score</div><div class="kv b">81.4%</div><div class="ks">14 audited factories</div><div class="pbar"><div class="pfill b" style="width:81.4%"></div></div></div>
-    <div class="kcard r"><div class="kl">ESG Hold Flags</div><div class="kv r">2</div><div class="ks">Orders on hold pending CAP</div></div>
+    <div class="kcard r"><div class="kl">ESG Hold Flags</div><div class="kv r">2</div><div class="ks">Derived: factories with any Non-Neg gate = Fail (Sheet 13) → orders placed on hold</div></div>
     <div class="kcard g"><div class="kl">Approved Factories</div><div class="kv g">9 / 14</div><div class="ks">64% full approval</div></div>
     <div class="kcard y"><div class="kl">Open CAP Items</div><div class="kv y">23</div><div class="ks">Across 6 factories</div></div>
     <div class="kcard t"><div class="kl">Peak Monthly Capacity</div><div class="kv t">142k</div><div class="ks">pcs / month (combined)</div></div>
@@ -474,6 +474,10 @@ tbody tr:last-child td{border-bottom:none}
       <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/auditor/machines/{factory_id}</div><div class="api-desc">Machine inventory by type from Sheets 6K (Knit), 6C (Cut &amp; Sew), and 6F (Finishing): machine counts, age, and capacity metrics.</div><div class="api-params"><em>Params</em> audit_id, machine_type (knit|cns|finish)</div></div></div>
       <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/auditor/cap-items</div><div class="api-desc">Open Corrective Action Plan items (Post-Visit Sheet 16) across all factories with status, due dates, and responsible party.</div><div class="api-params"><em>Params</em> factory_id, status (open|in_progress|closed|overdue), due_before</div></div></div>
       <div class="api-card"><div class="api-badge put">PUT</div><div><div class="api-endpoint">/auditor/cap-items/{id}</div><div class="api-desc">Update a CAP item status, add closure evidence, or reassign the responsible party and due date.</div><div class="api-params"><em>Body</em> status, closure_evidence_url, due_date, responsible_party, remarks</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/auditor/observations/{factory_id}</div><div class="api-desc">Structured auditor observations from Sheet 14 across all 17 observation topics (Factory Overview, Machinery, Workforce, Sample Room, Material Storage, QC Equipment, Security, Certifications, etc.).</div><div class="api-params"><em>Params</em> audit_id, topic (factory_overview|machinery|workforce|sample_room|material_storage|qc_equipment|security|certifications|geography|identity|attendees|sub_con|other)</div></div></div>
+      <div class="api-card"><div class="api-badge post">POST</div><div><div class="api-endpoint">/auditor/observations/{factory_id}</div><div class="api-desc">Submit or update auditor free-text observations (Sheet 14) for a specific audit. Each observation entry contains a topic code and bilingual text (EN/CN).</div><div class="api-params"><em>Body</em> audit_id, observations[ { topic, observation_en, observation_cn } ]</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/auditor/photo-log/{factory_id}</div><div class="api-desc">Photo evidence log from Sheet 15: all photos taken during the audit with section code, filename, bilingual caption, and compliance flag (⚠). Supports filtering by section code or flag status.</div><div class="api-params"><em>Params</em> audit_id, section_code (A1–A18), flagged_only (true|false)</div></div></div>
+      <div class="api-card"><div class="api-badge post">POST</div><div><div class="api-endpoint">/auditor/photo-log/{factory_id}</div><div class="api-desc">Upload and register photos to the audit Photo Log (Sheet 15). Accepts image files with associated metadata (section code, caption, flag).</div><div class="api-params"><em>Body</em> audit_id, photos[ { fig_number, section_code, filename, caption_en, caption_cn, flag } ]</div></div></div>
     </div>
   </div>
 </div>
@@ -486,7 +490,7 @@ tbody tr:last-child td{border-bottom:none}
 <div class="sec-inner">
   <div class="hdr">
     <h2>Final Inspection Template <span class="file-tag">LYY_Final_Inspection_Template_v1.1.xlsx</span></h2>
-    <p>Sheets: 1. Insp Time &amp; PO Style Info · 3. Cutting Report · 5. Packing &amp; Shipping Mark · 6. Accessories · 7. Check Point List · 8. Workmanship Defects · 9. Production Safety Mgmt · 10. Random Sampling–Meas · 11. Random Sampling–AQL · 13. Keep Sample</p>
+    <p>Sheets: 1. Insp Time &amp; PO Style Info · 2. Upload Report Files · 3. Cutting Report · 4. PP Sample · 5. Packing &amp; Shipping Mark · 6. Accessories · 7. Check Point List · 8. Workmanship Defects · 9. Production Safety Mgmt · 10. Random Sampling–Meas · 11. Random Sampling–AQL · 12. Photo Journal · 13. Keep Sample</p>
   </div>
 
   <div class="filters">
@@ -500,12 +504,19 @@ tbody tr:last-child td{border-bottom:none}
     <div class="fg"><label>Date To</label><input type="date" value="2024-06-30"></div>
   </div>
 
+  <div class="slabel">Sheet 4. PP Sample — Pre-Production Sample Reference at Final Inspection</div>
+  <div class="krow k3">
+    <div class="kcard g"><div class="kl">PP Sample Comment Rate</div><div class="kv g">96%</div><div class="ks">Sheet 4 — Comments recorded (EN or CN) / Total inspections</div><div class="pbar"><div class="pfill g" style="width:96%"></div></div></div>
+    <div class="kcard b"><div class="kl">PP Sample Photos Uploaded</div><div class="kv b">284</div><div class="ks">Sheet 4 — Photos attached across all final inspection records</div></div>
+    <div class="kcard y"><div class="kl">Photo Journal Flagged</div><div class="kv y">38</div><div class="ks">Sheet 12 — Photos with ⚠ Flag = Y (non-conformance evidence)</div></div>
+  </div>
+
   <div class="slabel">Sheet 11. Random Sampling–AQL — Sampling Size · Accept Level · Reject Level · Rejected Pieces · Results</div>
   <div class="krow k5">
-    <div class="kcard g"><div class="kl">First-Pass Yield (FPY)</div><div class="kv g">94.2%</div><div class="ks">Sampling Size − Rejected Pieces / Sampling Size</div><div class="pbar"><div class="pfill g" style="width:94.2%"></div></div></div>
+    <div class="kcard g"><div class="kl">First-Pass Yield (FPY)</div><div class="kv g">94.2%</div><div class="ks">Derived: (Sampling Size − Rejected Pieces) ÷ Sampling Size × 100</div><div class="pbar"><div class="pfill g" style="width:94.2%"></div></div></div>
     <div class="kcard r"><div class="kl">Total Rejected Pieces</div><div class="kv r">342</div><div class="ks">of 5,876 sampling size</div></div>
-    <div class="kcard b"><div class="kl">AQL Pass Rate</div><div class="kv b">78.6%</div><div class="ks">Inspections with Pass result</div></div>
-    <div class="kcard y"><div class="kl">Avg Defective %</div><div class="kv y">4.8%</div><div class="ks">Across all final lots</div></div>
+    <div class="kcard b"><div class="kl">AQL Pass Rate</div><div class="kv b">78.6%</div><div class="ks">Derived: COUNT(Results = Pass) ÷ COUNT(all inspections) × 100</div></div>
+    <div class="kcard y"><div class="kl">Avg Defective %</div><div class="kv y">4.8%</div><div class="ks">Derived: Rejected Pieces ÷ Sampling Size · across all final lots</div></div>
     <div class="kcard t"><div class="kl">Color Count</div><div class="kv t">3.2</div><div class="ks">Avg colors per inspection</div></div>
   </div>
 
@@ -532,7 +543,7 @@ tbody tr:last-child td{border-bottom:none}
       <div class="ccard-body"><div class="chart-wrap"><canvas id="t4c4"></canvas></div></div>
     </div>
     <div class="ccard">
-      <div class="ccard-head"><h3>Sheet 6. Accessories Check <span>(Present / Missing)</span></h3></div>
+      <div class="ccard-head"><h3>Sheet 6. Accessories Check <span>(Present / Missing — all 15 items)</span></h3></div>
       <div class="ccard-body"><div class="chart-wrap"><canvas id="t4c5"></canvas></div></div>
     </div>
   </div>
@@ -572,13 +583,18 @@ tbody tr:last-child td{border-bottom:none}
     </div>
     <div class="api-grid">
       <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/final-inspection/records</div><div class="api-desc">List final inspection records filterable by factory, style, PO, material, product category, AQL result, and date range.</div><div class="api-params"><em>Params</em> factory_id, style, po_number, material, category, aql_result (pass|fail), date_from, date_to</div></div></div>
-      <div class="api-card"><div class="api-badge post">POST</div><div><div class="api-endpoint">/final-inspection/records</div><div class="api-desc">Submit a new final inspection record capturing PO info (Sheet 1), cutting report (Sheet 3), packing/shipping mark (Sheet 5), and inspection metadata.</div><div class="api-params"><em>Body</em> factory_id, style, po_number, material, color_count, order_qty, cutting_qty, insp_date, inspector_id</div></div></div>
+      <div class="api-card"><div class="api-badge post">POST</div><div><div class="api-endpoint">/final-inspection/records</div><div class="api-desc">Submit a new final inspection record capturing PO info (Sheet 1), cutting report (Sheet 3), packing/shipping mark (Sheet 5), and inspection metadata. inspector_id maps to the Inspector field on Sheet 1.</div><div class="api-params"><em>Body</em> factory_id, style, po_number, cpo_number, material, color_count, order_qty, cutting_qty, insp_date, start_time, end_time, inspector_id</div></div></div>
       <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/final-inspection/aql/{inspection_id}</div><div class="api-desc">AQL random sampling results from Sheet 11: sampling size, accept level (Ac), reject level (Re), rejected pieces, defective %, and final result.</div><div class="api-params"><em>Params</em> inspection_id</div></div></div>
       <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/final-inspection/workmanship/{inspection_id}</div><div class="api-desc">Workmanship defects from Sheet 8: CRIT/MAJ/MIN counts, defect type, body position, and pre-alert flag per defect entry.</div><div class="api-params"><em>Params</em> inspection_id, severity (crit|maj|min), position</div></div></div>
       <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/final-inspection/checkpoints/{inspection_id}</div><div class="api-desc">Check Point List results from Sheet 7: OK / Not Conform status across Sewing, Trimming, Labelling, Measurements, Packing, Fabric, and Vacuum Pack.</div><div class="api-params"><em>Params</em> inspection_id, category</div></div></div>
       <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/final-inspection/safety/{inspection_id}</div><div class="api-desc">Production Safety Management data from Sheet 9: needle log, broken needle records, transfer box, 100% metal detection, MD calibration, metal-free zone, sharp bindings.</div><div class="api-params"><em>Params</em> inspection_id</div></div></div>
       <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/final-inspection/measurements/{inspection_id}</div><div class="api-desc">Random sampling measurement results from Sheet 10: measurements quantity checked, major deviations, and minor deviations vs spec.</div><div class="api-params"><em>Params</em> inspection_id</div></div></div>
-      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/final-inspection/accessories/{inspection_id}</div><div class="api-desc">Accessories check from Sheet 6: present/missing status for Zipper, Lining, Polybag, Hang Tag, Price Ticket, Buttons, Care Label, Main Label, Factory ID.</div><div class="api-params"><em>Params</em> inspection_id</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/final-inspection/accessories/{inspection_id}</div><div class="api-desc">Accessories check from Sheet 6: present/missing status for all 15 items — Zipper, Lining, Polybag, Packaging, Hang Tag, Price Ticket, Belts, Interlining, Elastic, Shoulder Pads, Threads, Care/Content Label, Buttons, Main Label, Factory ID Label.</div><div class="api-params"><em>Params</em> inspection_id</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/final-inspection/pp-sample/{inspection_id}</div><div class="api-desc">PP Sample reference from Sheet 4: date, bilingual comment (EN/CN), and list of uploaded PP sample photo filenames linked to this final inspection record.</div><div class="api-params"><em>Params</em> inspection_id</div></div></div>
+      <div class="api-card"><div class="api-badge post">POST</div><div><div class="api-endpoint">/final-inspection/pp-sample/{inspection_id}</div><div class="api-desc">Submit or update the PP Sample entry (Sheet 4) for a final inspection record: date, EN/CN comments, and photo uploads.</div><div class="api-params"><em>Body</em> date, comment_en, comment_cn, photos[ ]</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/final-inspection/photo-journal/{inspection_id}</div><div class="api-desc">Photo Journal from Sheet 12: all inspection photos with section code, filename, bilingual caption, and non-conformance flag (⚠). Supports filtering by flagged-only.</div><div class="api-params"><em>Params</em> inspection_id, flagged_only (true|false), section_code</div></div></div>
+      <div class="api-card"><div class="api-badge post">POST</div><div><div class="api-endpoint">/final-inspection/photo-journal/{inspection_id}</div><div class="api-desc">Upload and register photos to the Photo Journal (Sheet 12) for a specific final inspection record.</div><div class="api-params"><em>Body</em> photos[ { fig_number, section_code, filename, caption_en, caption_cn, flag } ]</div></div></div>
+      <div class="api-card"><div class="api-badge post">POST</div><div><div class="api-endpoint">/final-inspection/upload-files/{inspection_id}</div><div class="api-desc">Attach report files (Sheet 2) to a final inspection record: lab reports, buyer approvals, and third-party certificates.</div><div class="api-params"><em>Body</em> files[ { filename, upload_date, file_type (PDF|Image|Excel), description } ]</div></div></div>
     </div>
   </div>
 </div>
@@ -591,7 +607,7 @@ tbody tr:last-child td{border-bottom:none}
 <div class="sec-inner">
   <div class="hdr">
     <h2>Inline Inspection Template <span class="file-tag">LYY_Inline_Inspection_Template_v1.1.xlsx</span></h2>
-    <p>Sheets: 1. Insp Time &amp; PO Style Info · 5. Accessories · 6. Production Status · 8. Pre-packaged Photos · 9. Check Point List · 10. Workmanship Defects · 11. Production Safety Mgmt · 12. Random Sampling–Meas · 14. Keep Sample</p>
+    <p>Sheets: 1. Insp Time &amp; PO Style Info · 2. Upload Report Files · 3. PP Sample · 4. Cutting Doc &amp; Lab Test · 5. Accessories · 6. Production Status · 7. Production Status Photos · 8. Pre-packaged Photos · 9. Check Point List · 10. Workmanship Defects · 11. Production Safety Mgmt · 12. Random Sampling–Meas · 13. Photo Journal · 14. Keep Sample</p>
   </div>
 
   <div class="filters">
@@ -611,6 +627,14 @@ tbody tr:last-child td{border-bottom:none}
     <div class="kcard g"><div class="kl">Semi Finished</div><div class="kv g">3,600</div><div class="ks">72% of order qty</div><div class="pbar"><div class="pfill g" style="width:72%"></div></div></div>
     <div class="kcard y"><div class="kl">Finished</div><div class="kv y">2,400</div><div class="ks">48% of order qty</div><div class="pbar"><div class="pfill y" style="width:48%"></div></div></div>
     <div class="kcard o"><div class="kl">In-House Share</div><div class="kv o">74%</div><div class="ks">vs 26% subcontracted</div></div>
+  </div>
+
+  <div class="slabel">Sheet 3. PP Sample &amp; Sheet 4. Cutting Doc &amp; Lab Test — Inline Pre-Production Gates</div>
+  <div class="krow k4">
+    <div class="kcard g"><div class="kl">PP Sample Approved</div><div class="kv g">82%</div><div class="ks">Sheet 3 — Approved / Total inline inspections</div><div class="pbar"><div class="pfill g" style="width:82%"></div></div></div>
+    <div class="kcard b"><div class="kl">Cutting Auth. Granted</div><div class="kv b">91%</div><div class="ks">Sheet 4 — Cutting Authorisation = Y</div><div class="pbar"><div class="pfill b" style="width:91%"></div></div></div>
+    <div class="kcard y"><div class="kl">Lab Test Pass Rate</div><div class="kv y">78%</div><div class="ks">Sheet 4 — Lab Test Result = Pass</div><div class="pbar"><div class="pfill y" style="width:78%"></div></div></div>
+    <div class="kcard r"><div class="kl">Lab Tests Pending</div><div class="kv r">14</div><div class="ks">Sheet 4 — Lab Test Result = Pending</div></div>
   </div>
 
   <div class="slabel">Sheet 10. Workmanship Defects — CRIT · MAJ · MIN · Defect Type · Position · Pre Alert</div>
@@ -644,6 +668,17 @@ tbody tr:last-child td{border-bottom:none}
     <div class="ccard">
       <div class="ccard-head"><h3>Sheet 11. Safety Mgmt <span>(Needle / Sharp / Metal Det.)</span></h3></div>
       <div class="ccard-body"><div class="chart-wrap"><canvas id="t5c5"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="cgrid c2">
+    <div class="ccard">
+      <div class="ccard-head"><h3>Sheet 5. Accessories Check <span>(Present / Missing — all 15 items)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap" style="height:280px"><canvas id="t5c6"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Sheet 4. Cutting Doc &amp; Lab Test — Lab Test Results <span>(Pass / Fail / Pending by test type)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap" style="height:280px"><canvas id="t5c7"></canvas></div></div>
     </div>
   </div>
 
@@ -682,13 +717,21 @@ tbody tr:last-child td{border-bottom:none}
     </div>
     <div class="api-grid">
       <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/inline-inspection/records</div><div class="api-desc">List inline inspection records filterable by factory, style, PO, material, product category, and inspection date range.</div><div class="api-params"><em>Params</em> factory_id, style, po_number, material, category, date_from, date_to, page, limit</div></div></div>
-      <div class="api-card"><div class="api-badge post">POST</div><div><div class="api-endpoint">/inline-inspection/records</div><div class="api-desc">Submit a new inline inspection record with PO info (Sheet 1) and inspection metadata including colour count, order qty, and in-house/subcontracted split.</div><div class="api-params"><em>Body</em> factory_id, style, po_number, material, color_count, order_qty, in_house_pct, insp_date, inspector_id</div></div></div>
+      <div class="api-card"><div class="api-badge post">POST</div><div><div class="api-endpoint">/inline-inspection/records</div><div class="api-desc">Submit a new inline inspection record with PO info (Sheet 1) and inspection metadata including colour count, order qty, and in-house production quantity. inspector_id maps to Inspector field on Sheet 1. in_house_qty is the raw quantity from the "In House or Subcontracted" field in Sheet 6; In-House Share % is derived as in_house_qty ÷ order_qty × 100.</div><div class="api-params"><em>Body</em> factory_id, style, po_number, cpo_number, material, color_count, order_qty, in_house_qty, insp_date, start_time, end_time, inspector_id</div></div></div>
       <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/inline-inspection/production-status/{id}</div><div class="api-desc">Production status data from Sheet 6: order qty, cutting pieces, semi-finished, finished, embroider/print outside and back, in-house vs subcontracted share.</div><div class="api-params"><em>Params</em> inspection_id, week (for weekly trend)</div></div></div>
       <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/inline-inspection/workmanship/{id}</div><div class="api-desc">Workmanship defects from Sheet 10: CRIT/MAJ/MIN counts, defect type, body position, and pre-alert flag per defect entry.</div><div class="api-params"><em>Params</em> inspection_id, severity (crit|maj|min), position</div></div></div>
       <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/inline-inspection/checkpoints/{id}</div><div class="api-desc">Check Point List results from Sheet 9: OK / Not Conform status per category (Sewing, Trimming, Labelling, Measurements, Packing, Fabric, Vacuum Pack).</div><div class="api-params"><em>Params</em> inspection_id, category</div></div></div>
       <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/inline-inspection/safety/{id}</div><div class="api-desc">Safety management records from Sheet 11: needle log, broken needle, needle box, 100% metal detection, MD calibration, metal-free zone, sharp bindings.</div><div class="api-params"><em>Params</em> inspection_id</div></div></div>
       <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/inline-inspection/measurements/{id}</div><div class="api-desc">Random sampling measurement results from Sheet 12: total measurements checked, major deviations count, and minor deviations count.</div><div class="api-params"><em>Params</em> inspection_id</div></div></div>
       <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/inline-inspection/photos/{id}</div><div class="api-desc">Pre-packaged photo results from Sheet 8: pass/fail status with remarks on folding method, polybag sticker, and packaging conformance.</div><div class="api-params"><em>Params</em> inspection_id</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/inline-inspection/accessories/{id}</div><div class="api-desc">Accessories check from Sheet 5: present/missing status for all 15 items — Zipper, Lining, Polybag, Packaging, Hang Tag, Price Ticket, Belts, Interlining, Elastic, Shoulder Pads, Threads, Care/Content Label, Buttons, Main Label, Factory ID Label.</div><div class="api-params"><em>Params</em> inspection_id</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/inline-inspection/pp-sample/{id}</div><div class="api-desc">PP Sample status from Sheet 3: approval status (Approved/Pending/Rejected), approval date, bilingual comments, and uploaded PP sample photo list.</div><div class="api-params"><em>Params</em> inspection_id</div></div></div>
+      <div class="api-card"><div class="api-badge post">POST</div><div><div class="api-endpoint">/inline-inspection/pp-sample/{id}</div><div class="api-desc">Submit or update the PP Sample record (Sheet 3) for an inline inspection: status, approval date, EN/CN comments, and photo uploads.</div><div class="api-params"><em>Body</em> pp_sample_status (approved|pending|rejected), pp_approval_date, comment_en, comment_cn, photos[ ]</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/inline-inspection/cutting-doc/{id}</div><div class="api-desc">Cutting Doc &amp; Lab Test data from Sheet 4: cutting authorisation status and date, lab test report reference, test type, result (Pass/Fail/Pending), and comments.</div><div class="api-params"><em>Params</em> inspection_id, lab_test_type (shrinkage|colourfastness|gsm|spirality|ph|other), result (pass|fail|pending)</div></div></div>
+      <div class="api-card"><div class="api-badge post">POST</div><div><div class="api-endpoint">/inline-inspection/cutting-doc/{id}</div><div class="api-desc">Submit cutting authorisation and lab test records (Sheet 4) for an inline inspection. Supports multiple lab test entries per inspection.</div><div class="api-params"><em>Body</em> cutting_authorisation (Y|N|pending), cutting_auth_date, lab_tests[ { report_ref, lab_test_type, result, comments } ]</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/inline-inspection/status-photos/{id}</div><div class="api-desc">Production Status Photos from Sheet 7: photos cross-referenced to Sheet 6 production stages with stage code, filename, bilingual caption, date taken, and flag.</div><div class="api-params"><em>Params</em> inspection_id, stage (cutting|sewing|finishing|packing), flagged_only (true|false)</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/inline-inspection/photo-journal/{id}</div><div class="api-desc">Photo Journal from Sheet 13: all inspection photos with section code, filename, bilingual caption, and non-conformance flag (⚠). Identical structure to Final Inspection Sheet 12 photo log.</div><div class="api-params"><em>Params</em> inspection_id, flagged_only (true|false), section_code</div></div></div>
+      <div class="api-card"><div class="api-badge post">POST</div><div><div class="api-endpoint">/inline-inspection/upload-files/{id}</div><div class="api-desc">Attach report files (Sheet 2) to an inline inspection record: lab dip approvals, cutting reports, buyer comments, and third-party test certificates.</div><div class="api-params"><em>Body</em> files[ { filename, upload_date, file_type (PDF|Image|Excel), description } ]</div></div></div>
     </div>
   </div>
 </div>
@@ -728,8 +771,8 @@ tbody tr:last-child td{border-bottom:none}
   <div class="krow k4">
     <div class="kcard r"><div class="kl">Avg Cut Slippage</div><div class="kv r">+4.2d</div><div class="ks">Actual − Plan Cut Date</div></div>
     <div class="kcard r"><div class="kl">Avg Sew Slippage</div><div class="kv r">+6.8d</div><div class="ks">Actual − Plan Sew Date</div></div>
-    <div class="kcard g"><div class="kl">On-Track POs</div><div class="kv g">61%</div><div class="ks">23 of 38 active POs</div></div>
-    <div class="kcard o"><div class="kl">At Risk / Critical</div><div class="kv o">39%</div><div class="ks">15 POs behind schedule</div></div>
+    <div class="kcard g"><div class="kl">On-Track POs</div><div class="kv g">61%</div><div class="ks">Derived: cut slip ≤2d AND sew slip ≤2d — 23 of 38 active POs</div></div>
+    <div class="kcard o"><div class="kl">At Risk / Critical</div><div class="kv o">39%</div><div class="ks">Derived: At Risk = cut 3–7d or sew 3–10d slip; Critical = cut >7d or sew >10d — 15 POs</div></div>
   </div>
 
   <div class="cgrid c2">
@@ -789,7 +832,7 @@ tbody tr:last-child td{border-bottom:none}
       <div class="api-card"><div class="api-badge post">POST</div><div><div class="api-endpoint">/pp-meeting/records</div><div class="api-desc">Submit a new PP meeting record including Style &amp; PO info, Colours &amp; Quantity table, Meeting Details &amp; Milestones, and planned Schedule Dates.</div><div class="api-params"><em>Body</em> vendor_id, factory_id, style, po_number, brand, season, ppm_date, milestones, schedule_dates, colours_qty[ ]</div></div></div>
       <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/pp-meeting/schedule/{po_id}</div><div class="api-desc">Plan vs Actual schedule dates for a PO: cut date pair, sew date pair, finishing date, packing date, X-factory date, with computed slippage days.</div><div class="api-params"><em>Params</em> po_id</div></div></div>
       <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/pp-meeting/milestones/{po_id}</div><div class="api-desc">PP Meeting milestone status: PPM date, PP Sample Approved (Y/N/Pending), Green Tag Sample (Y/N), Size Set Status, Multi-Factory Production flag.</div><div class="api-params"><em>Params</em> po_id</div></div></div>
-      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/pp-meeting/slippage/summary</div><div class="api-desc">Aggregated slippage KPI summary: avg cut slippage days, avg sew slippage days, on-track PO count, at-risk count, critical count across filters.</div><div class="api-params"><em>Params</em> vendor_id, factory_id, season, date_from, date_to</div></div></div>
+      <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/pp-meeting/slippage/summary</div><div class="api-desc">Aggregated slippage KPI summary: avg cut slippage days, avg sew slippage days, on-track / at-risk / critical PO counts. Classification thresholds: On-Track = cut slip ≤2d AND sew slip ≤2d; At-Risk = cut slip 3–7d OR sew slip 3–10d; Critical = cut slip &gt;7d OR sew slip &gt;10d.</div><div class="api-params"><em>Params</em> vendor_id, factory_id, season, date_from, date_to, on_track_cut_threshold_days (default 2), at_risk_cut_threshold_days (default 7), on_track_sew_threshold_days (default 2), at_risk_sew_threshold_days (default 10)</div></div></div>
       <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/pp-meeting/colours-quantities/{po_id}</div><div class="api-desc">Colour and quantity breakdown from the Colours &amp; Quantity Table: colour name, quantity per colour, size ratio breakdown, and total order qty.</div><div class="api-params"><em>Params</em> po_id</div></div></div>
       <div class="api-card"><div class="api-badge get">GET</div><div><div class="api-endpoint">/pp-meeting/completion-rates</div><div class="api-desc">Factory-level order completion rates broken down as On Track, At Risk, and Critical across all active POs for a given season or date window.</div><div class="api-params"><em>Params</em> factory_id, season, date_from, date_to</div></div></div>
       <div class="api-card"><div class="api-badge put">PUT</div><div><div class="api-endpoint">/pp-meeting/records/{id}/milestones</div><div class="api-desc">Update milestone status for a PP meeting record: PP Approved, Green Tag Sample result, Size Set confirmation, and Multi-Factory Production flag.</div><div class="api-params"><em>Body</em> pp_approved, green_tag_sample, size_set_status, multi_factory, updated_by</div></div></div>
@@ -999,12 +1042,12 @@ mk('t1c6',{type:'doughnut',data:{
   datasets:[{data:[87,13],backgroundColor:[C.green,C.red],borderWidth:0,hoverOffset:10,borderRadius:3}]
 },options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',boxWidth:11,padding:14}},tooltip:TIP}}});
 
-// Radar: bulk conformity
+// Radar: bulk conformity (10 checks — matches MD Section 2.1 Bulk Conformity field list)
 mk('t1c7',{type:'radar',data:{
-  labels:['Fit on Dummy','Bulk vs TP','Fabric/Colour','Emb/Print','Measurement','Bulk Label','Carton Mark','Silica Gel'],
+  labels:['Fit on Dummy','Bulk vs TP','Fabric/Colour','Emb/Print','Measurement','Bulk Label','Carton Mark','Silica Gel','Meas. Result','Spec Sheet'],
   datasets:[
-    {label:'OK %',data:[82,78,68,88,80,84,90,94],backgroundColor:'rgba(16,185,129,.18)',borderColor:C.green,pointBackgroundColor:C.green,pointRadius:4,pointBorderWidth:2,borderWidth:2},
-    {label:'Not OK %',data:[12,18,26,8,16,12,8,4],backgroundColor:'rgba(244,63,94,.12)',borderColor:C.red,pointBackgroundColor:C.red,pointRadius:4,pointBorderWidth:2,borderWidth:2}
+    {label:'OK %',data:[82,78,68,88,80,84,90,94,86,91],backgroundColor:'rgba(16,185,129,.18)',borderColor:C.green,pointBackgroundColor:C.green,pointRadius:4,pointBorderWidth:2,borderWidth:2},
+    {label:'Not OK %',data:[12,18,26,8,16,12,8,4,10,7],backgroundColor:'rgba(244,63,94,.12)',borderColor:C.red,pointBackgroundColor:C.red,pointRadius:4,pointBorderWidth:2,borderWidth:2}
   ]
 },options:{...RBASE}});
 
@@ -1142,14 +1185,14 @@ mk('t4c4',{type:'bar',data:{
   datasets:[{label:'Yes %',data:[91,72,86,84,88,74,89],backgroundColor:d=>d.raw<80?C.red:d.raw<90?C.yellow:C.green,borderRadius:4}]
 },options:{...BASE,indexAxis:'y',plugins:{...BASE.plugins,legend:{display:false}},scales:{x:{min:0,max:100,ticks:{...T,callback:v=>v+'%'},grid:G},y:{ticks:{...T,font:{size:10}},grid:G}}}});
 
-// Horizontal stacked bar: accessories
+// Horizontal stacked bar: accessories (all 15 items from Final Inspection Sheet 6)
 mk('t4c5',{type:'bar',data:{
-  labels:['Zipper','Lining','Polybag','Hang Tag','Price Ticket','Buttons','Care Label','Main Label','Factory ID'],
+  labels:['Zipper','Lining','Polybag','Packaging','Hang Tag','Price Ticket','Belts','Interlining','Elastic','Shoulder Pads','Threads','Care Label','Buttons','Main Label','Factory ID'],
   datasets:[
-    {label:'Present',data:[94,88,96,91,89,92,86,98,95],backgroundColor:C.green,borderRadius:3},
-    {label:'Missing',data:[6,12,4,9,11,8,14,2,5],backgroundColor:C.red,borderRadius:3}
+    {label:'Present',data:[94,88,96,92,91,89,78,82,85,79,90,86,92,98,95],backgroundColor:C.green,borderRadius:3},
+    {label:'Missing',data:[6,12,4,8,9,11,22,18,15,21,10,14,8,2,5],backgroundColor:C.red,borderRadius:3}
   ]
-},options:{...BASE,indexAxis:'y',scales:{x:{stacked:true,ticks:T,grid:G},y:{stacked:true,ticks:{...T,font:{size:10}},grid:G}}}});
+},options:{...BASE,indexAxis:'y',scales:{x:{stacked:true,ticks:T,grid:G},y:{stacked:true,ticks:{...T,font:{size:9}},grid:G}}}});
 
 // ══ T5 — INLINE INSPECTION ══════════════════════
 
@@ -1198,6 +1241,25 @@ mk('t5c5',{type:'bar',data:{
   labels:['Needle Log','Broken Needle','Needle Box','100% Metal Det.','MD Calibration','Metal-Free Zone','Sharp Bindings'],
   datasets:[{label:'Compliance %',data:[94,78,88,82,90,74,92],backgroundColor:C.purple,borderRadius:4}]
 },options:{...BASE,indexAxis:'y',plugins:{...BASE.plugins,legend:{display:false}},scales:{x:{min:0,max:100,ticks:{...T,callback:v=>v+'%'},grid:G},y:{ticks:{...T,font:{size:10}},grid:G}}}});
+
+// Horizontal stacked bar: inline accessories (Sheet 5 — all 15 items)
+mk('t5c6',{type:'bar',data:{
+  labels:['Zipper','Lining','Polybag','Packaging','Hang Tag','Price Ticket','Belts','Interlining','Elastic','Shoulder Pads','Threads','Care Label','Buttons','Main Label','Factory ID'],
+  datasets:[
+    {label:'Present',data:[91,84,93,89,88,87,74,79,82,76,88,83,90,96,92],backgroundColor:C.green,borderRadius:3},
+    {label:'Missing',data:[9,16,7,11,12,13,26,21,18,24,12,17,10,4,8],backgroundColor:C.red,borderRadius:3}
+  ]
+},options:{...BASE,indexAxis:'y',scales:{x:{stacked:true,ticks:T,grid:G},y:{stacked:true,ticks:{...T,font:{size:9}},grid:G}}}});
+
+// Horizontal stacked bar: inline lab test results (Sheet 4)
+mk('t5c7',{type:'bar',data:{
+  labels:['Shrinkage (Wash)','Shrinkage (Dry)','Colourfastness CF','Colourfastness Wash','GSM / Weight','Spirality','pH / Other'],
+  datasets:[
+    {label:'Pass',data:[76,80,72,68,84,82,88],backgroundColor:C.green,borderRadius:3},
+    {label:'Fail',data:[10,8,16,18,8,10,6],backgroundColor:C.red,borderRadius:3},
+    {label:'Pending',data:[14,12,12,14,8,8,6],backgroundColor:C.yellow,borderRadius:3}
+  ]
+},options:{...BASE,indexAxis:'y',scales:{x:{stacked:true,ticks:T,grid:G},y:{stacked:true,ticks:{...T,font:{size:10}},grid:G}}}});
 
 // ══ T6 — PP MEETING ═════════════════════════════
 
