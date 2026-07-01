@@ -129,6 +129,25 @@ tbody tr:last-child td{border-bottom:none}
 @media(max-width:1200px){.k4,.k5{grid-template-columns:repeat(2,1fr)}.k3{grid-template-columns:repeat(2,1fr)}.c3{grid-template-columns:1fr 1fr}}
 @media(max-width:900px){.c2,.c3,.c32,.c23{grid-template-columns:1fr}.i2{grid-template-columns:1fr}.k3,.k4,.k5{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.k3,.k4,.k5{grid-template-columns:1fr}.sec-inner{padding:14px 14px 48px}}
+/* ── T8 Overall Analysis additions ────────────── */
+.pfill.p{background:linear-gradient(90deg,var(--accent2),rgba(139,106,252,.5))}
+.pfill.t{background:linear-gradient(90deg,var(--teal),rgba(6,182,212,.5))}
+.ksrc{font-size:9px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;opacity:.8}
+.t8chip{background:rgba(139,106,252,.1);border:1px solid rgba(139,106,252,.22);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--accent2);font-weight:600;letter-spacing:.2px;display:inline-flex;align-items:center}
+.t8chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.t8gate{display:flex;align-items:center;gap:12px;padding:11px 18px;background:var(--s2);border-radius:var(--r-sm);border:1px solid var(--border);margin-bottom:8px;transition:border-color .15s}
+.t8gate:hover{border-color:var(--border2)}
+.t8gnum{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.t8gname{font-size:11.5px;font-weight:700;color:var(--text);min-width:200px;flex-shrink:0}
+.t8gsrc{font-size:10px;font-weight:600;color:var(--accent2);font-family:'SF Mono',Consolas,monospace;min-width:160px;flex-shrink:0;opacity:.85}
+.t8gbg{flex:1;height:8px;background:rgba(255,255,255,.06);border-radius:8px;overflow:hidden}
+.t8gfill{height:100%;border-radius:8px}
+.t8gpct{font-size:13px;font-weight:800;min-width:52px;text-align:right;flex-shrink:0;letter-spacing:-.3px}
+.pill.hold{background:rgba(244,63,94,.08);color:#ff7092;border:1px solid rgba(244,63,94,.2);font-style:italic}
+.srcs{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.srcs span{font-size:9.5px;font-weight:600;padding:1px 7px;border-radius:3px;background:rgba(139,106,252,.1);border:1px solid rgba(139,106,252,.2);color:var(--accent2);font-family:'SF Mono',Consolas,monospace}
+@media(max-width:1200px){.t8gname{min-width:140px}.t8gsrc{min-width:120px}}
+@media(max-width:800px){.t8gate{flex-wrap:wrap}.t8gbg{min-width:100%;order:4}.t8gpct{order:3}}
 </style>
 </head>
 <body>
@@ -143,6 +162,7 @@ tbody tr:last-child td{border-bottom:none}
     <div class="tab" onclick="show('t5',4)">5 · Inline Inspection</div>
     <div class="tab" onclick="show('t6',5)">6 · PP Meeting</div>
     <div class="tab" onclick="show('t7',6)">7 · Spot Check</div>
+    <div class="tab" onclick="show('t8',7)">8 · Overall Analysis</div>
   </div>
 </nav>
 
@@ -948,6 +968,467 @@ tbody tr:last-child td{border-bottom:none}
 </div>
 </section>
 
+<!-- ══════════════════════════════════════════════════
+     T8 · OVERALL ANALYSIS
+══════════════════════════════════════════════════ -->
+<section id="t8" class="sec">
+<div class="sec-inner">
+
+  <div class="hdr" style="border-left-color:var(--accent2)">
+    <h2>Overall Analysis <span class="file-tag" style="background:rgba(139,106,252,.12);border-color:rgba(139,106,252,.3);color:var(--accent2);font-size:12px;font-weight:600;padding:2px 10px;border-radius:4px;border:1px solid">ALL TEMPLATES</span></h2>
+    <p>Cross-template consolidated analytics combining all 7 LYY quality inspection templates. Every KPI and chart shows the source template and field so data lineage is always traceable. Use the filters below to slice across factories, vendors, brands, and seasons.</p>
+    <div class="t8chips">
+      <span class="t8chip">T1 · Daily Check</span>
+      <span class="t8chip">T2 · Fabric Inspection</span>
+      <span class="t8chip">T3 · Field Auditor</span>
+      <span class="t8chip">T4 · Final Inspection</span>
+      <span class="t8chip">T5 · Inline Inspection</span>
+      <span class="t8chip">T6 · PP Meeting</span>
+      <span class="t8chip">T7 · Spot Check</span>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="fg"><label>Factory</label><select><option>All Factories</option><option>Factory A – GZ</option><option>Factory B – DG</option><option>Factory C – SZ</option><option>Factory D – FS</option></select></div>
+    <div class="fg"><label>PO Vendor</label><select><option>All Vendors</option><option>Vendor Alpha</option><option>Vendor Beta</option></select></div>
+    <div class="fg"><label>Brand / Dept</label><select><option>All Brands</option><option>Brand A</option><option>Brand B</option></select></div>
+    <div class="fg"><label>Season</label><select><option>All Seasons</option><option>SS 2024</option><option>AW 2024</option><option>SS 2025</option></select></div>
+    <div class="fg"><label>Factory Type</label><select><option>All Types</option><option>Cut &amp; Sew</option><option>Knitwear</option><option>Full Package</option></select></div>
+    <div class="fg"><label>Date From</label><input type="date" value="2024-01-01"></div>
+    <div class="fg"><label>Date To</label><input type="date" value="2024-06-30"></div>
+  </div>
+
+  <!-- ── Executive Summary ─────────────────────── -->
+  <div class="slabel" style="margin-top:12px">Executive Summary <span class="t8chip" style="font-size:9px;padding:1px 7px;font-weight:500;letter-spacing:.1px;margin-left:6px">All 7 Templates · Derived KPIs</span></div>
+  <div class="krow k4">
+    <div class="kcard g">
+      <div class="ksrc">T4 · Final Inspection · Sheet 11</div>
+      <div class="kl">First-Pass Yield (FPY)</div>
+      <div class="kv g">94.2%</div>
+      <div class="ks">(Sampling Size − Rejected Pieces) ÷ Sampling Size · current period</div>
+      <div class="pbar"><div class="pfill g" style="width:94.2%"></div></div>
+    </div>
+    <div class="kcard b">
+      <div class="ksrc">T1 · T4 · T5 · T7 · AQL Inspection Fields</div>
+      <div class="kl">Overall AQL Pass Rate</div>
+      <div class="kv b">80.2%</div>
+      <div class="ks">Weighted avg across Daily · Inline · Spot Check · Final inspection types</div>
+      <div class="pbar"><div class="pfill b" style="width:80.2%"></div></div>
+    </div>
+    <div class="kcard g">
+      <div class="ksrc">T6 · PP Meeting · Plan vs Actual Date fields</div>
+      <div class="kl">On-Track POs</div>
+      <div class="kv g">61%</div>
+      <div class="ks">23 of 38 active POs — cut slip ≤2d AND sew slip ≤2d</div>
+      <div class="pbar"><div class="pfill g" style="width:61%"></div></div>
+    </div>
+    <div class="kcard r">
+      <div class="ksrc">T3 · Field Auditor · Sheet 13 Non-Neg</div>
+      <div class="kl">ESG Hold Flags</div>
+      <div class="kv r">2</div>
+      <div class="ks">Factories with ≥1 Non-Neg gate = Fail — active orders on hold</div>
+    </div>
+  </div>
+  <div class="krow k4">
+    <div class="kcard t">
+      <div class="ksrc">T1 · Daily Check · Visit Details</div>
+      <div class="kl">Avg Machine Utilization</div>
+      <div class="kv t">83.6%</div>
+      <div class="ks">No. Machines Running ÷ No. Machines Allocated across active lines</div>
+      <div class="pbar"><div class="pfill t" style="width:83.6%"></div></div>
+    </div>
+    <div class="kcard o">
+      <div class="ksrc">T2 · Fabric Inspection · Roll Inspection Results</div>
+      <div class="kl">Roll Rejection Rate</div>
+      <div class="kv o">8.3%</div>
+      <div class="ks">47 of 564 rolls Result = Reject across all inspected lots</div>
+      <div class="kt dn">↑ +2.1 pp vs last batch</div>
+    </div>
+    <div class="kcard y">
+      <div class="ksrc">T3 · Field Auditor · Post-Visit Sheet 16</div>
+      <div class="kl">Open CAP Items</div>
+      <div class="kv y">23</div>
+      <div class="ks">CAP Status ≠ Closed across 6 factories · 14 overdue &gt;30 days</div>
+    </div>
+    <div class="kcard p">
+      <div class="ksrc">T3 · Field Auditor · Cover Sheet 1 · Tier field</div>
+      <div class="kl">Approved Factories</div>
+      <div class="kv p">9 / 14</div>
+      <div class="ks">Tier = APPROVED · 64% full approval rate among audited suppliers</div>
+      <div class="pbar"><div class="pfill p" style="width:64%"></div></div>
+    </div>
+  </div>
+
+  <!-- ── Quality Gate Pipeline ─────────────────── -->
+  <div class="slabel">Quality Gate Pipeline — Sequential Production Flow <span class="t8chip" style="font-size:9px;padding:1px 7px;font-weight:500;letter-spacing:.1px;margin-left:6px">T6 → T2 → T5 → T1 → T7 → T4</span></div>
+  <div class="cgrid" style="margin-bottom:20px">
+    <div class="ccard">
+      <div class="ccard-head">
+        <h3>Pass Rate at Each Quality Gate
+          <span>Source template and field shown per gate &nbsp;·&nbsp; Threshold: <span style="color:var(--green)">●</span> ≥85% Healthy &nbsp;<span style="color:var(--yellow)">●</span> 70–84% Watch &nbsp;<span style="color:var(--red)">●</span> &lt;70% Alert</span>
+        </h3>
+      </div>
+      <div class="ccard-body" style="padding:18px 22px 14px">
+        <div class="t8gate">
+          <div class="t8gnum" style="background:rgba(245,158,11,.2);color:var(--yellow)">1</div>
+          <div class="t8gname">PP Approval Gate</div>
+          <div class="t8gsrc">PP Approved = Yes &nbsp;·&nbsp; T6 Sheet 1</div>
+          <div class="t8gbg"><div class="t8gfill" style="width:79%;background:linear-gradient(90deg,var(--yellow),rgba(245,158,11,.5))"></div></div>
+          <div class="t8gpct" style="color:var(--yellow)">79.0%</div>
+          <span class="pill warn" style="min-width:58px;text-align:center;font-size:10px">Watch</span>
+        </div>
+        <div class="t8gate">
+          <div class="t8gnum" style="background:rgba(16,185,129,.2);color:var(--green)">2</div>
+          <div class="t8gname">Fabric Quality Gate</div>
+          <div class="t8gsrc">Overall Result = Pass &nbsp;·&nbsp; T2 Roll Inspection</div>
+          <div class="t8gbg"><div class="t8gfill" style="width:91.7%;background:linear-gradient(90deg,var(--green),rgba(16,185,129,.5))"></div></div>
+          <div class="t8gpct" style="color:var(--green)">91.7%</div>
+          <span class="pill pass" style="min-width:58px;text-align:center;font-size:10px">Healthy</span>
+        </div>
+        <div class="t8gate">
+          <div class="t8gnum" style="background:rgba(16,185,129,.2);color:var(--green)">3</div>
+          <div class="t8gname">Cutting Auth Gate</div>
+          <div class="t8gsrc">Cutting Authorisation = Y &nbsp;·&nbsp; T5 Sheet 4</div>
+          <div class="t8gbg"><div class="t8gfill" style="width:91%;background:linear-gradient(90deg,var(--green),rgba(16,185,129,.5))"></div></div>
+          <div class="t8gpct" style="color:var(--green)">91.0%</div>
+          <span class="pill pass" style="min-width:58px;text-align:center;font-size:10px">Healthy</span>
+        </div>
+        <div class="t8gate">
+          <div class="t8gnum" style="background:rgba(16,185,129,.2);color:var(--green)">4</div>
+          <div class="t8gname">Daily / Inline AQL Gate</div>
+          <div class="t8gsrc">Acceptance = Ac &nbsp;·&nbsp; T1 AQL Inspection</div>
+          <div class="t8gbg"><div class="t8gfill" style="width:87.3%;background:linear-gradient(90deg,var(--green),rgba(16,185,129,.5))"></div></div>
+          <div class="t8gpct" style="color:var(--green)">87.3%</div>
+          <span class="pill pass" style="min-width:58px;text-align:center;font-size:10px">Healthy</span>
+        </div>
+        <div class="t8gate">
+          <div class="t8gnum" style="background:rgba(245,158,11,.2);color:var(--yellow)">5</div>
+          <div class="t8gname">Spot Check Gate</div>
+          <div class="t8gsrc">AQL Result = Accept &nbsp;·&nbsp; T7 Sec 5 &amp; 8</div>
+          <div class="t8gbg"><div class="t8gfill" style="width:72.1%;background:linear-gradient(90deg,var(--yellow),rgba(245,158,11,.5))"></div></div>
+          <div class="t8gpct" style="color:var(--yellow)">72.1%</div>
+          <span class="pill warn" style="min-width:58px;text-align:center;font-size:10px">Watch</span>
+        </div>
+        <div class="t8gate" style="margin-bottom:0">
+          <div class="t8gnum" style="background:rgba(245,158,11,.2);color:var(--yellow)">6</div>
+          <div class="t8gname">Final AQL Gate</div>
+          <div class="t8gsrc">Results = Pass &nbsp;·&nbsp; T4 Sheet 11</div>
+          <div class="t8gbg"><div class="t8gfill" style="width:78.6%;background:linear-gradient(90deg,var(--yellow),rgba(245,158,11,.5))"></div></div>
+          <div class="t8gpct" style="color:var(--yellow)">78.6%</div>
+          <span class="pill warn" style="min-width:58px;text-align:center;font-size:10px">Watch</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:20px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+          <span style="font-size:11px;color:var(--muted)">Key insight: 3 of 6 gates are under the 85% threshold — Spot Check (72.1%), Final AQL (78.6%) and PP Approval (79.0%) are the priority improvement levers for current season.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── AQL Performance & Factory Radar ───────── -->
+  <div class="slabel">AQL Performance Trend &amp; Factory Radar <span class="t8chip" style="font-size:9px;padding:1px 7px;font-weight:500;letter-spacing:.1px;margin-left:6px">T1 · T4 · T5 · T7 &amp; T3 Field Auditor</span></div>
+  <div class="cgrid c2">
+    <div class="ccard">
+      <div class="ccard-head"><h3>AQL Pass Rate by Inspection Type — 6-Week Trend <span>(Daily Check T1 · Inline T5 · Spot T7 · Final T4 · Acceptance and Result fields)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t8c1"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Factory Performance Radar <span>(Compliance % · AQL Pass % · FPY % · Machine Util % · Fabric Pass % — normalised 0–100 · T3 T4 T1 T2)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t8c2"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- ── Defect Intelligence ────────────────────── -->
+  <div class="slabel">Defect Intelligence <span class="t8chip" style="font-size:9px;padding:1px 7px;font-weight:500;letter-spacing:.1px;margin-left:6px">T1 Daily · T5 Inline · T4 Final — Defect Type &amp; CRIT / MAJ / MIN fields</span></div>
+  <div class="krow k4">
+    <div class="kcard r">
+      <div class="ksrc">T1 + T5 + T4 · MAJ across all stages</div>
+      <div class="kl">Total Major Defects</div>
+      <div class="kv r">1,118</div>
+      <div class="ks">Combined MAJ count across Daily + Inline + Final Workmanship Defects</div>
+    </div>
+    <div class="kcard y">
+      <div class="ksrc">T1 + T5 + T4 · MIN across all stages</div>
+      <div class="kl">Total Minor Defects</div>
+      <div class="kv y">2,243</div>
+      <div class="ks">Combined MIN count · 2.0× the major rate — high minor-to-major ratio</div>
+    </div>
+    <div class="kcard o">
+      <div class="ksrc">T5 Sheet 10 → T4 Sheet 8 · Escape analysis</div>
+      <div class="kl">Defect Escape Rate</div>
+      <div class="kv o">87%</div>
+      <div class="ks">Inline MAJ found at Final stage ÷ Inline MAJ — share escaping inline gate</div>
+    </div>
+    <div class="kcard r">
+      <div class="ksrc">T4 Sheet 8 + T5 Sheet 10 · CRIT</div>
+      <div class="kl">Critical Defects (CRIT)</div>
+      <div class="kv r">6</div>
+      <div class="ks">Combined CRIT count across Final + Inline Workmanship Defects</div>
+    </div>
+  </div>
+  <div class="cgrid c2">
+    <div class="ccard">
+      <div class="ccard-head"><h3>Combined Defect Pareto — All Stages <span>(Defect Type field · Daily + Inline + Final · bars = count · line = cumulative %)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t8c3"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Defect Escape: Inline MAJ vs Final MAJ by Factory <span>(T5 Sheet 10 MAJ vs T4 Sheet 8 MAJ — same factory, same period)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t8c4"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- ── Schedule & WIP ─────────────────────────── -->
+  <div class="slabel">Schedule &amp; WIP Overview <span class="t8chip" style="font-size:9px;padding:1px 7px;font-weight:500;letter-spacing:.1px;margin-left:6px">T6 PP Meeting · T1 Daily Check · Plan vs Actual Date fields</span></div>
+  <div class="krow k4">
+    <div class="kcard r">
+      <div class="ksrc">T6 · PP Meeting · Plan vs Actual Cut Date</div>
+      <div class="kl">Avg Cut Slippage</div>
+      <div class="kv r">+4.2 d</div>
+      <div class="ks">AVG(Actual Cut Date − Plan Cut Date) across all active POs</div>
+    </div>
+    <div class="kcard r">
+      <div class="ksrc">T6 · PP Meeting · Plan vs Actual Sew Date</div>
+      <div class="kl">Avg Sew Slippage</div>
+      <div class="kv r">+6.8 d</div>
+      <div class="ks">AVG(Actual Sew Date − Plan Sew Date) — 1.6× amplification vs cut slip</div>
+    </div>
+    <div class="kcard g">
+      <div class="ksrc">T6 · PP Meeting · Schedule Dates derived KPI</div>
+      <div class="kl">On-Track POs</div>
+      <div class="kv g">23</div>
+      <div class="ks">Cut slip ≤2d AND sew slip ≤2d · 61% of 38 active POs currently on schedule</div>
+    </div>
+    <div class="kcard y">
+      <div class="ksrc">T6 · PP Meeting · Schedule Dates derived KPI</div>
+      <div class="kl">At-Risk + Critical POs</div>
+      <div class="kv y">15</div>
+      <div class="ks">At Risk (cut 3–7d / sew 3–10d): 9 POs &nbsp;·&nbsp; Critical (&gt;7d / &gt;10d): 6 POs</div>
+    </div>
+  </div>
+  <div class="cgrid c3">
+    <div class="ccard">
+      <div class="ccard-head"><h3>PO Schedule Status Distribution <span>(On-Track / At Risk / Critical · T6 Sheet 1)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap" style="height:210px"><canvas id="t8c5"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>WIP Pipeline — Order to Packed <span>(Order Qty · Cutting · Sewing · Finishing · Packed · T1 Production Status)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap" style="height:210px"><canvas id="t8c6"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Cut &amp; Sew Slippage by PO <span>(Actual − Plan Cut and Sew dates · T6 Sheet 1)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap" style="height:210px"><canvas id="t8c7"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- ── Material & Fabric Risk ─────────────────── -->
+  <div class="slabel">Material &amp; Fabric Risk <span class="t8chip" style="font-size:9px;padding:1px 7px;font-weight:500;letter-spacing:.1px;margin-left:6px">T2 Fabric Inspection — Rolls · Shade · Pts/100yd² · Lab Tests · Vendor / Mill field</span></div>
+  <div class="krow k4">
+    <div class="kcard b">
+      <div class="ksrc">T2 · Fabric Inspection · Rolls Inspected field</div>
+      <div class="kl">Total Rolls Inspected</div>
+      <div class="kv b">564</div>
+      <div class="ks">Across 5 lots · 4 mills — current season cumulative</div>
+    </div>
+    <div class="kcard g">
+      <div class="ksrc">T2 · Fabric · Pts/100yd² vs Threshold 28</div>
+      <div class="kl">Avg Pts / 100 yd²</div>
+      <div class="kv g">19.4</div>
+      <div class="ks">Threshold = 28 pts/100yd² · 30.7% headroom · 3 of 4 mills below limit</div>
+      <div class="pbar"><div class="pfill g" style="width:69%"></div></div>
+    </div>
+    <div class="kcard r">
+      <div class="ksrc">T2 · Fabric · Vendor / Mill field + Pts/100yd²</div>
+      <div class="kl">Mills Over Threshold</div>
+      <div class="kv r">1</div>
+      <div class="ks">Mill B avg 31.2 pts/100yd² — exceeds 28 pt shipment maximum</div>
+    </div>
+    <div class="kcard y">
+      <div class="ksrc">T2 · Fabric · Lab / Physical Test Reports section</div>
+      <div class="kl">Lab Test Pass Rate</div>
+      <div class="kv y">86.7%</div>
+      <div class="ks">Avg pass rate across 7 test types · weakest: Wash CF 78%, Crocking CF 82%</div>
+      <div class="pbar"><div class="pfill y" style="width:86.7%"></div></div>
+    </div>
+  </div>
+  <div class="cgrid c2">
+    <div class="ccard">
+      <div class="ccard-head"><h3>Mill Defect Performance — Avg Pts/100yd² vs Threshold <span>(Length + Width + Total Pts per roll aggregated by Vendor / Mill · T2)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t8c8"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>Lab &amp; Physical Test Pass Rate <span>(Shrinkage · Crocking CF · Wash CF · GSM/Weight · Spirality · pH · T2 Lab / Physical Test Reports)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap"><canvas id="t8c9"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- ── Compliance & ESG ───────────────────────── -->
+  <div class="slabel">Compliance, ESG &amp; PP Approval Funnel <span class="t8chip" style="font-size:9px;padding:1px 7px;font-weight:500;letter-spacing:.1px;margin-left:6px">T3 Sheets 11 13 16 · T6 PP Approved · T5 Sheet 3 · T4 Sheet 4</span></div>
+  <div class="krow k4">
+    <div class="kcard b">
+      <div class="ksrc">T3 · Field Auditor · Sheet 11 Compliance Checklist</div>
+      <div class="kl">Avg Compliance Score</div>
+      <div class="kv b">81.4%</div>
+      <div class="ks">Sheet 11 Pass/Fail/NA checklist items weighted score · 14 factories</div>
+      <div class="pbar"><div class="pfill b" style="width:81.4%"></div></div>
+    </div>
+    <div class="kcard g">
+      <div class="ksrc">T3 · Field Auditor · Sheet 13 Non-Neg Gates</div>
+      <div class="kl">ESG Gates Cleared</div>
+      <div class="kv g">80 / 84</div>
+      <div class="ks">Non-Neg = Pass · 14 factories × 6 gates · 4.8% fail rate</div>
+    </div>
+    <div class="kcard p">
+      <div class="ksrc">T6 · PP Meeting · PP Approved field</div>
+      <div class="kl">PP Sample Approved %</div>
+      <div class="kv p">79%</div>
+      <div class="ks">PP Approved = Yes at PP Meeting stage · 30 of 38 active POs</div>
+      <div class="pbar"><div class="pfill p" style="width:79%"></div></div>
+    </div>
+    <div class="kcard t">
+      <div class="ksrc">T3 · Field Auditor · Cover Sheet 1 · Capacity field</div>
+      <div class="kl">Peak Monthly Capacity</div>
+      <div class="kv t">142 k</div>
+      <div class="ks">pcs/month combined · Peak Monthly Capacity field · 14 audited factories</div>
+    </div>
+  </div>
+  <div class="cgrid c3">
+    <div class="ccard">
+      <div class="ccard-head"><h3>ESG Non-Neg Gates by Factory <span>(Sheet 13 — Child Labour · Locked Exits · Forced Labour · Chem Mgmt · Hidden Sub-con · Building Safety)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap" style="height:210px"><canvas id="t8c10"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>CAP Item Status Distribution <span>(Post-Visit Sheet 16 · Status field: Not Started / In Progress / Closed / Overdue)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap" style="height:210px"><canvas id="t8c11"></canvas></div></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-head"><h3>PP Approval Cross-Template Funnel <span>(T6 PP Approved → T5 Sheet 3 PP Sample Status → T4 Sheet 4 PP Comment)</span></h3></div>
+      <div class="ccard-body"><div class="chart-wrap" style="height:210px"><canvas id="t8c12"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- ── Cross-Template Insights ───────────────── -->
+  <div class="slabel">Cross-Template Insights</div>
+  <div class="irow i2">
+    <div class="icard r">
+      <div class="iico">⚠</div>
+      <div class="ibody">
+        <h4>Factory B: Cascading Failures Across 5 Templates</h4>
+        <p>Factory B shows low compliance 71% (T3 Sheet 11), persistent Spot Check AQL Reject on follow-up triggers (T7), Inline MAJ 58 vs Final MAJ 85 — defects generating post-inline (T5→T4), machine utilization 70.4% (T1 Daily), and cut +6d / sew +10d slippage (T6). A cross-template CAPA covering all 5 dimensions is required before any new PO placement.</p>
+        <div class="srcs"><span>T1</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span></div>
+      </div>
+    </div>
+    <div class="icard y">
+      <div class="iico">🧵</div>
+      <div class="ibody">
+        <h4>Mill B Fabric Risk Propagates to Inline Lab Failures</h4>
+        <p>Mill B averages 31.2 pts/100yd² (T2 — above the 28 pt threshold) and failed the Shade Check aggregate (Centre-Selvedge + Roll-Roll). The same lot links to Factory B's Inline Lab Test Result = Fail (T5 Sheet 4 — Wash CF 68% pass). Lot Disposition (T2) should be escalated to Return to Mill before any new Cutting Authorisation (T5 Sheet 4) is issued.</p>
+        <div class="srcs"><span>T2 Rolls</span><span>T2 Lab</span><span>T5 Sheet 4</span></div>
+      </div>
+    </div>
+    <div class="icard y">
+      <div class="iico">📅</div>
+      <div class="ibody">
+        <h4>Sew Slippage Amplification Compresses Downstream Windows</h4>
+        <p>Avg cut slippage +4.2d (T6) vs sew slippage +6.8d — a 1.6× amplification ratio. Each cut delay generates 1.6× the sew delay, shortening inline inspection windows (T5), compressing time for spot check follow-ups (T7), and forcing rushed final inspection scheduling (T4). PP planned dates must include factory-specific slippage buffers derived from T6 historical averages.</p>
+        <div class="srcs"><span>T6</span><span>T5</span><span>T7</span><span>T4</span></div>
+      </div>
+    </div>
+    <div class="icard g">
+      <div class="iico">📈</div>
+      <div class="ibody">
+        <h4>High Compliance Score Is the Best Leading Indicator for FPY</h4>
+        <p>Factories scoring ≥85% on Sheet 11 compliance (Factory A: 93%, Factory C: 88%) average FPY 94–97% at final inspection (T4 Sheet 11). Factories below 70% compliance (Factory D: 58%) are on ESG hold with no current AQL data. T3 Field Auditor score is the most reliable upstream leading indicator for downstream shipment quality — audit earlier, ship better.</p>
+        <div class="srcs"><span>T3 Sheet 11</span><span>T3 Sheet 13</span><span>T4 Sheet 11</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Master Factory Scorecard ──────────────── -->
+  <div class="slabel">Master Factory Scorecard <span class="t8chip" style="font-size:9px;padding:1px 7px;font-weight:500;letter-spacing:.1px;margin-left:6px">T3 · T4 · T6 · T1 · T2 — cross-template factory-level view</span></div>
+  <div class="tcard">
+    <div class="tcard-head">Cross-template factory performance — Field Auditor (Rating · Compliance · ESG) · Final Inspection (AQL Pass · FPY) · PP Meeting (Slippage) · Fabric (Roll Reject %) · Daily Check (Machine Util %)</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Factory</th>
+            <th>Audit Rating <small style="opacity:.6;font-weight:400">T3 Sh.1</small></th>
+            <th>Compliance % <small style="opacity:.6;font-weight:400">T3 Sh.11</small></th>
+            <th>ESG Non-Neg <small style="opacity:.6;font-weight:400">T3 Sh.13</small></th>
+            <th>Final AQL Pass <small style="opacity:.6;font-weight:400">T4 Sh.11</small></th>
+            <th>FPY % <small style="opacity:.6;font-weight:400">T4 Sh.11</small></th>
+            <th>Avg Cut Slip <small style="opacity:.6;font-weight:400">T6</small></th>
+            <th>Avg Sew Slip <small style="opacity:.6;font-weight:400">T6</small></th>
+            <th>Roll Reject % <small style="opacity:.6;font-weight:400">T2</small></th>
+            <th>Open CAPs <small style="opacity:.6;font-weight:400">T3 Sh.16</small></th>
+            <th>PP Approved <small style="opacity:.6;font-weight:400">T6</small></th>
+            <th>Mach. Util % <small style="opacity:.6;font-weight:400">T1</small></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Factory A – GZ</strong></td>
+            <td><span class="pill pass">APPROVED</span></td>
+            <td><span class="pill pass">93%</span></td>
+            <td><span class="pill pass">6/6 Pass</span></td>
+            <td><span class="pill pass">91%</span></td>
+            <td><span class="pill pass">96.5%</span></td>
+            <td><span class="pill pass">0.0 d</span></td>
+            <td><span class="pill pass">+0.5 d</span></td>
+            <td><span class="pill pass">4.2%</span></td>
+            <td>0</td>
+            <td><span class="pill pass">Yes</span></td>
+            <td><span class="pill pass">93.8%</span></td>
+          </tr>
+          <tr>
+            <td><strong>Factory C – SZ</strong></td>
+            <td><span class="pill pass">APPROVED</span></td>
+            <td><span class="pill pass">88%</span></td>
+            <td><span class="pill pass">6/6 Pass</span></td>
+            <td><span class="pill pass">85%</span></td>
+            <td><span class="pill pass">93.8%</span></td>
+            <td><span class="pill warn">+3.0 d</span></td>
+            <td><span class="pill warn">+3.0 d</span></td>
+            <td><span class="pill warn">8.6%</span></td>
+            <td>2</td>
+            <td><span class="pill pass">Yes</span></td>
+            <td><span class="pill warn">73.3%</span></td>
+          </tr>
+          <tr>
+            <td><strong>Factory B – DG</strong></td>
+            <td><span class="pill warn">COND.</span></td>
+            <td><span class="pill warn">71%</span></td>
+            <td><span class="pill warn">5/6 Pass</span></td>
+            <td><span class="pill fail">62%</span></td>
+            <td><span class="pill warn">82.1%</span></td>
+            <td><span class="pill fail">+6.0 d</span></td>
+            <td><span class="pill fail">+10.0 d</span></td>
+            <td><span class="pill fail">14.5%</span></td>
+            <td>7</td>
+            <td><span class="pill warn">Pending</span></td>
+            <td><span class="pill fail">70.4%</span></td>
+          </tr>
+          <tr>
+            <td><strong>Factory D – FS</strong></td>
+            <td><span class="pill fail">NOT REC.</span></td>
+            <td><span class="pill fail">58%</span></td>
+            <td><span class="pill fail">4/6 Fail</span></td>
+            <td><span class="pill hold">On Hold</span></td>
+            <td><span class="pill hold">On Hold</span></td>
+            <td>—</td>
+            <td>—</td>
+            <td>—</td>
+            <td>14</td>
+            <td><span class="pill fail">No</span></td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</section>
+
 <script>
 // ── nav ──────────────────────────────────────────
 function show(id,idx){
@@ -1348,6 +1829,111 @@ mk('t7c5',{type:'bar',data:{
     {label:'N-A',data:[6,4,6,4,6,6,4,4,2],backgroundColor:'#2e3557',borderRadius:3}
   ]
 },options:{...BASE,indexAxis:'y',scales:{x:{stacked:true,ticks:T,grid:G},y:{stacked:true,ticks:{...T,font:{size:10}},grid:G}}}});
+
+// ══ T8 — OVERALL ANALYSIS ═══════════════════════
+
+// t8c1: AQL Pass Rate Trend by Inspection Type
+mk('t8c1',{type:'line',data:{
+  labels:['Week 1','Week 2','Week 3','Week 4','Week 5','Week 6'],
+  datasets:[
+    {label:'Daily Check AQL (T1)',data:[89.1,85.4,87.2,88.6,86.9,87.3],borderColor:C.blue,backgroundColor:'rgba(91,115,249,.1)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:C.blue,borderWidth:2},
+    {label:'Inline AQL (T5)',data:[84.2,80.1,83.8,85.2,82.4,84.0],borderColor:C.teal,backgroundColor:'rgba(6,182,212,.07)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:C.teal,borderWidth:2},
+    {label:'Spot Check AQL (T7)',data:[76.4,70.2,72.8,74.1,69.8,72.1],borderColor:C.yellow,backgroundColor:'rgba(245,158,11,.07)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:C.yellow,borderWidth:2},
+    {label:'Final Insp. AQL (T4)',data:[80.2,75.8,78.9,80.4,77.2,78.6],borderColor:C.green,backgroundColor:'rgba(16,185,129,.07)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:C.green,borderWidth:2}
+  ]
+},options:{...LBASE,scales:{x:{ticks:T,grid:G},y:{ticks:{...T,callback:v=>v+'%'},grid:G,min:60,max:100,title:{display:true,text:'Pass Rate %',color:'#94a3b8',font:{size:11}}}}}});
+
+// t8c2: Factory Performance Radar
+mk('t8c2',{type:'radar',data:{
+  labels:['Compliance %\n(T3 Sh.11)','AQL Pass %\n(T4 Sh.11)','FPY %\n(T4 Sh.11)','Mach. Util %\n(T1)','Fabric Pass %\n(T2)'],
+  datasets:[
+    {label:'Factory A',data:[93,91,96.5,93.8,95.8],backgroundColor:'rgba(16,185,129,.15)',borderColor:C.green,pointBackgroundColor:C.green,pointRadius:4,borderWidth:2},
+    {label:'Factory B',data:[71,62,82.1,70.4,85.5],backgroundColor:'rgba(244,63,94,.1)',borderColor:C.red,pointBackgroundColor:C.red,pointRadius:4,borderWidth:2},
+    {label:'Factory C',data:[88,85,93.8,73.3,91.4],backgroundColor:'rgba(91,115,249,.12)',borderColor:C.blue,pointBackgroundColor:C.blue,pointRadius:4,borderWidth:2}
+  ]
+},options:{...RBASE,plugins:{...RBASE.plugins,legend:{position:'bottom',labels:{color:'#94a3b8',boxWidth:10,font:{size:11}}}}}});
+
+// t8c3: Combined Defect Pareto (dual-axis bar + cumulative line)
+mk('t8c3',{type:'bar',data:{
+  labels:['Open Seams','Skip Stitches','Uncut Threads','Mis-Aligned','Puckering','Poor Pressing','Raw Edges','Colour Var.'],
+  datasets:[
+    {type:'bar',label:'Total Count',data:[286,214,162,145,128,119,108,98],backgroundColor:[C.red,C.orange,C.yellow,C.purple,C.blue,C.teal,C.green,C.pink],borderRadius:4,yAxisID:'y'},
+    {type:'line',label:'Cumulative %',data:[22.7,39.7,52.5,64.0,74.2,83.7,92.3,100],borderColor:'rgba(245,158,11,.9)',pointBackgroundColor:C.yellow,pointRadius:5,fill:false,tension:.3,yAxisID:'y2',borderWidth:2}
+  ]
+},options:{...BASE,scales:{x:{ticks:{...T,maxRotation:25},grid:G},y:{ticks:T,grid:G,title:{display:true,text:'Count',color:'#94a3b8',font:{size:11}}},y2:{position:'right',min:0,max:100,ticks:{...T,callback:v=>v+'%'},grid:{display:false}}}}});
+
+// t8c4: Defect Escape Rate by Factory
+mk('t8c4',{type:'bar',data:{
+  labels:['Factory A','Factory B','Factory C'],
+  datasets:[
+    {label:'Inline MAJ (T5 Sheet 10)',data:[14,58,21],backgroundColor:C.teal,borderRadius:5,borderSkipped:false},
+    {label:'Final MAJ (T4 Sheet 8)',data:[12,85,18],backgroundColor:C.red,borderRadius:5,borderSkipped:false}
+  ]
+},options:{...BASE,scales:{x:{ticks:T,grid:G},y:{ticks:T,grid:G,title:{display:true,text:'Major Defect Count',color:'#94a3b8',font:{size:11}}}}}});
+
+// t8c5: PO Status Doughnut
+mk('t8c5',{type:'doughnut',data:{
+  labels:['On-Track','At Risk','Critical'],
+  datasets:[{data:[23,9,6],backgroundColor:[C.green,C.yellow,C.red],borderWidth:0,hoverOffset:10,borderRadius:3}]
+},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',boxWidth:11,padding:10,font:{size:11}}},tooltip:TIP}}});
+
+// t8c6: WIP Pipeline horizontal bar
+mk('t8c6',{type:'bar',data:{
+  labels:['Packed','Finishing','Sewing','Cutting','Order Qty'],
+  datasets:[{label:'Units',data:[1900,2600,4200,4800,5000],backgroundColor:[C.orange,C.yellow,C.green,C.teal,C.blue],borderRadius:5,borderSkipped:false}]
+},options:{...BASE,indexAxis:'y',plugins:{legend:{display:false},tooltip:TIP},scales:{x:{ticks:T,grid:G},y:{ticks:T,grid:G}}}});
+
+// t8c7: Cut & Sew Slippage by PO
+mk('t8c7',{type:'line',data:{
+  labels:['PO-2401','PO-2402','PO-2403','PO-2404','PO-2405','PO-2406','PO-2407','PO-2408'],
+  datasets:[
+    {label:'Cut Slippage (days)',data:[0,6,3,0,7,2,4,1],borderColor:C.blue,backgroundColor:'rgba(91,115,249,.1)',fill:true,tension:.4,pointRadius:5,pointBackgroundColor:C.blue,borderWidth:2.5},
+    {label:'Sew Slippage (days)',data:[1,10,3,0,9,4,7,2],borderColor:C.red,backgroundColor:'rgba(244,63,94,.08)',fill:true,tension:.4,pointRadius:5,pointBackgroundColor:C.red,borderWidth:2.5}
+  ]
+},options:{...LBASE,scales:{x:{ticks:{...T,maxRotation:20},grid:G},y:{ticks:T,grid:G,min:0,title:{display:true,text:'Days Delayed',color:'#94a3b8',font:{size:11}}}}}});
+
+// t8c8: Mill Fabric Performance vs threshold
+mk('t8c8',{type:'bar',data:{
+  labels:['Mill A','Mill C','Mill D','Mill B'],
+  datasets:[
+    {type:'bar',label:'Avg Pts / 100 yd²',data:[17.1,22.8,24.6,31.2],backgroundColor:[C.green,C.yellow,C.yellow,C.red],borderRadius:6,borderSkipped:false},
+    {type:'line',label:'Max Threshold (28)',data:[28,28,28,28],borderColor:'rgba(244,63,94,.7)',borderDash:[6,4],pointRadius:0,backgroundColor:'transparent',borderWidth:2}
+  ]
+},options:{...BASE,plugins:{...BASE.plugins,legend:{...LEG,position:'bottom'}},scales:{x:{ticks:T,grid:G},y:{ticks:T,grid:G,title:{display:true,text:'Pts / 100 yd²',color:'#94a3b8',font:{size:11}}}}}});
+
+// t8c9: Lab & Physical Test Pass Rate (stacked horizontal bar)
+mk('t8c9',{type:'bar',data:{
+  labels:['Shrinkage (Wash)','Shrinkage (Dry)','Crocking CF','Wash CF','GSM / Weight','Spirality','pH / Other'],
+  datasets:[
+    {label:'Pass',data:[88,91,82,78,86,90,94],backgroundColor:C.green,borderRadius:3},
+    {label:'Fail',data:[12,9,18,22,14,10,6],backgroundColor:C.red,borderRadius:3}
+  ]
+},options:{...BASE,indexAxis:'y',scales:{x:{stacked:true,ticks:T,grid:G},y:{stacked:true,ticks:{...T,font:{size:10}},grid:G}}}});
+
+// t8c10: ESG Non-Neg Gates by Factory (stacked pass/fail)
+mk('t8c10',{type:'bar',data:{
+  labels:['Factory A','Factory B','Factory C','Factory D'],
+  datasets:[
+    {label:'Pass',data:[6,5,6,4],backgroundColor:C.green,borderRadius:4,borderSkipped:false},
+    {label:'Fail',data:[0,1,0,2],backgroundColor:C.red,borderRadius:4,borderSkipped:false}
+  ]
+},options:{...BASE,scales:{x:{stacked:true,ticks:T,grid:G},y:{stacked:true,max:6,ticks:T,grid:G,title:{display:true,text:'Gates (of 6)',color:'#94a3b8',font:{size:11}}}}}});
+
+// t8c11: CAP Status Doughnut
+mk('t8c11',{type:'doughnut',data:{
+  labels:['Closed','In Progress','Overdue','Not Started'],
+  datasets:[{data:[28,18,8,5],backgroundColor:[C.green,C.blue,C.red,C.yellow],borderWidth:0,hoverOffset:10,borderRadius:3}]
+},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',boxWidth:11,padding:10,font:{size:11}}},tooltip:TIP}}});
+
+// t8c12: PP Approval Cross-Template Funnel (grouped bar)
+mk('t8c12',{type:'bar',data:{
+  labels:['PP Meeting (T6)\nPP Approved','Inline Stage (T5)\nPP Sample Status','Final Stage (T4)\nPP Sample Comment'],
+  datasets:[
+    {label:'Yes / Approved',data:[30,31,36],backgroundColor:C.green,borderRadius:4,borderSkipped:false},
+    {label:'No / Rejected',data:[5,3,2],backgroundColor:C.red,borderRadius:4,borderSkipped:false},
+    {label:'Pending / N-A',data:[3,4,0],backgroundColor:C.yellow,borderRadius:4,borderSkipped:false}
+  ]
+},options:{...BASE,scales:{x:{stacked:true,ticks:{...T,maxRotation:0},grid:G},y:{stacked:true,ticks:T,grid:G,title:{display:true,text:'PO Count',color:'#94a3b8',font:{size:11}}}}}});
 </script>
 </body>
 </html>
